@@ -164,6 +164,84 @@ const EyeOutlineIcon = () => (
   </svg>
 );
 
+const UsersIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM18 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM6 11c1.66 0 3-1.34 3-3S7.66 2 6 2 3 3.34 3 5s1.34 3 3 3zM12 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4zM21 13c-.2 0-.42.02-.64.05C21.37 14.07 22 15.34 22 17v3h3v-3c0-2.66-2.67-4-4-4zM3 13c-.2 0-.42.02-.64.05.63 1.02 1.27 2.29 1.27 3.95v3H1v-3c0-2.66 2.67-4 4-4z" />
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+);
+
+const WrenchIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.1 12.9c-1.5-1.5-3.8-1.7-5.5-.5L11.8 14 10 12.2l1.6-1.8c-1.2-1.7-1-4 .5-5.5 1.7-1.7 4.3-1.9 6.2-.6l-2.4 2.4 2.1 2.1 2.4-2.4c1.3 1.9 1.1 4.5-.6 6.2zM4.1 21.3c-.6.6-1.5.6-2.1 0-.6-.6-1.5 0-2.1l6.1-6.1 2.1 2.1-6.1 6.1z" />
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+  </svg>
+);
+
+const UsersUpIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+  </svg>
+);
+
+const DownloadSquareIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <line x1="12" y1="8" x2="12" y2="16" />
+    <polyline points="8 12 12 16 16 12" />
+  </svg>
+);
+
+const ArrowLeftIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
+  </svg>
+);
+
+const CalendarLineIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const SuccessCheckIcon = () => (
+  <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+    <circle cx="60" cy="60" r="50" stroke="#16a34a" strokeWidth="8" />
+    <path d="M35 60l15 15 35-35" stroke="#16a34a" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 30l5 5M90 20l5-5M100 80l-5 5" stroke="#16a34a" strokeWidth="4" strokeLinecap="round" />
+  </svg>
+);
+
+const CheckCircleSolidIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="#16a34a">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+  </svg>
+);
+
+const PlusCircleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" color="#6b7280">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+  </svg>
+);
+
 
 // ─── Stat Card Badge ──────────────────────────────────────────────────────────
 
@@ -317,6 +395,19 @@ export default function DashboardPage() {
   const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
   const [searchTask, setSearchTask] = useState("");
   const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
+  const [templatesList, setTemplatesList] = useState(templatesData);
+
+  const [newTemplate, setNewTemplate] = useState({
+    title: "",
+    desc: "",
+    deadline: "",
+    category: "WORK",
+    priority: "MIDLE",
+    status: "TO DO",
+    label: "PRIVATE"
+  });
 
   const handleSignOut = () => {
     localStorage.removeItem("bentodo_token");
@@ -373,7 +464,11 @@ export default function DashboardPage() {
           ].map(({ key, label, icon }) => (
             <button
               key={key}
-              onClick={() => setActiveMenu(key)}
+              onClick={() => {
+                setActiveMenu(key);
+                setSelectedTemplateId(null);
+                setTemplateView("list");
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -451,7 +546,11 @@ export default function DashboardPage() {
           }}
         >
           <h1 style={{ fontSize: "18px", fontWeight: 700, color: "#111827", margin: 0 }}>
-            {activeMenu === "dashboard" ? "Dashboard" : activeMenu === "task" ? "Task" : "Template"}
+            {activeMenu === "dashboard" ? "Dashboard" :
+              activeMenu === "task" ? "Task" :
+                templateView === "create" ? "Create Template" :
+                  templateView === "success" ? "Create Template" :
+                    templateView === "detail" ? "Detail Template" : "Template"}
           </h1>
 
           {/* Search + Notification + Profile */}
@@ -532,94 +631,99 @@ export default function DashboardPage() {
         <div style={{ flex: 1, padding: "24px 32px", overflowY: "auto" }}>
 
           {/* Welcome + Time Range + Focus Timer */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
-            <div>
-              <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
-                Welcome, Ariqmuzakki
-              </h2>
-              <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>
-                Here&apos;s what&apos;s happening with your workspace today.
-              </p>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              {/* Toggle Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
-                  overflow: "hidden",
-                }}
-              >
-                {activeMenu === "dashboard" ? (
-                  (["Daily", "Weekly", "Monthly", "Yearly"] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTimeRange(t)}
-                      style={{
-                        padding: "8px 16px",
-                        fontSize: "12px",
-                        fontWeight: timeRange === t ? 600 : 400,
-                        fontFamily: "inherit",
-                        color: timeRange === t ? "#111827" : "#9ca3af",
-                        backgroundColor: timeRange === t ? "#f9fafb" : "#ffffff",
-                        border: "none",
-                        borderRight: "1px solid #e5e7eb",
-                        cursor: "pointer",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      {t}
-                    </button>
-                  ))
-                ) : (
-                  (["All", "Public", "Private"] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTemplateFilter(t)}
-                      style={{
-                        padding: "8px 16px",
-                        fontSize: "12px",
-                        fontWeight: templateFilter === t ? 600 : 400,
-                        fontFamily: "inherit",
-                        color: templateFilter === t ? "#111827" : "#9ca3af",
-                        backgroundColor: templateFilter === t ? "#ffffff" : "#f3f4f6",
-                        border: "none",
-                        borderRight: t !== "Private" ? "1px solid #e5e7eb" : "none",
-                        cursor: "pointer",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      {t}
-                    </button>
-                  ))
-                )}
+          {(activeMenu === "dashboard" || (activeMenu === "template" && templateView === "list") || activeMenu === "task") && (
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
+              <div>
+                <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
+                  Welcome, Ariqmuzakki
+                </h2>
+                <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>
+                  Here&apos;s what&apos;s happening with your workspace today.
+                </p>
               </div>
 
-              {/* Start Focus Timer Button */}
-              <button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  backgroundColor: "#16a34a",
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  transition: "background-color 0.15s",
-                }}
-              >
-                <PlayIcon />
-                {activeMenu === "dashboard" ? "Start Focus Timer" : "Template Baru"}
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                {/* Toggle Buttons */}
+                <div
+                  style={{
+                    display: "flex",
+                    borderRadius: "8px",
+                    border: "1px solid #e5e7eb",
+                    overflow: "hidden",
+                  }}
+                >
+                  {activeMenu === "dashboard" ? (
+                    (["Daily", "Weekly", "Monthly", "Yearly"] as const).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setTimeRange(t)}
+                        style={{
+                          padding: "8px 16px",
+                          fontSize: "12px",
+                          fontWeight: timeRange === t ? 600 : 400,
+                          fontFamily: "inherit",
+                          color: timeRange === t ? "#111827" : "#9ca3af",
+                          backgroundColor: timeRange === t ? "#f9fafb" : "#ffffff",
+                          border: "none",
+                          borderRight: "1px solid #e5e7eb",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        {t}
+                      </button>
+                    ))
+                  ) : (
+                    (["All", "Public", "Private"] as const).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setTemplateFilter(t)}
+                        style={{
+                          padding: "8px 16px",
+                          fontSize: "12px",
+                          fontWeight: templateFilter === t ? 600 : 400,
+                          fontFamily: "inherit",
+                          color: templateFilter === t ? "#111827" : "#9ca3af",
+                          backgroundColor: templateFilter === t ? "#ffffff" : "#f3f4f6",
+                          border: "none",
+                          borderRight: t !== "Private" ? "1px solid #e5e7eb" : "none",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        {t}
+                      </button>
+                    ))
+                  )}
+                </div>
+
+                {/* Start Focus Timer Button */}
+                <button
+                  onClick={() => {
+                    if (activeMenu === "template") setTemplateView("create");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    backgroundColor: "#16a34a",
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    transition: "background-color 0.15s",
+                  }}
+                >
+                  {activeMenu === "dashboard" ? <PlayIcon /> : <span style={{ fontSize: "16px", fontWeight: "bold", lineHeight: 1 }}>+</span>}
+                  {activeMenu === "dashboard" ? "Start Focus Timer" : "Template Baru"}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* ── Dashboard View ── */}
           {activeMenu === "dashboard" && (
@@ -947,10 +1051,10 @@ export default function DashboardPage() {
           )}
 
           {/* ── Template / Task View ── */}
-          {(activeMenu === "template" || activeMenu === "task") && (
+          {(activeMenu === "template" || activeMenu === "task") && templateView === "list" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-                {templatesData
+                {templatesList
                   .filter((item) => item.type.includes(templateFilter))
                   .map((item) => (
                     <div key={item.id} style={{
@@ -1005,11 +1109,16 @@ export default function DashboardPage() {
 
                       {/* Buttons */}
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "auto" }}>
-                        <button style={{
-                          flex: 1, height: "40px", borderRadius: "8px", backgroundColor: "#16a34a", color: "#ffffff",
-                          fontSize: "13px", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "inherit",
-                          transition: "background-color 0.15s"
-                        }}
+                        <button
+                          onClick={() => {
+                            setSelectedTemplateId(item.id);
+                            setTemplateView("detail");
+                          }}
+                          style={{
+                            flex: 1, height: "40px", borderRadius: "8px", backgroundColor: "#16a34a", color: "#ffffff",
+                            fontSize: "13px", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "inherit",
+                            transition: "background-color 0.15s"
+                          }}
                           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#15803d"; }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#16a34a"; }}
                         >
@@ -1052,6 +1161,438 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* ── Detail Template View ── */}
+          {activeMenu === "template" && templateView === "detail" && selectedTemplateId && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <button
+                onClick={() => {
+                  setSelectedTemplateId(null);
+                  setTemplateView("list");
+                }}
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  background: "none", border: "none", cursor: "pointer",
+                  color: "#111827", fontSize: "14px", fontWeight: 500, fontFamily: "inherit", alignSelf: "flex-start"
+                }}
+              >
+                <ArrowLeftIcon /> Back
+              </button>
+
+              <div style={{ display: "flex", gap: "24px", alignItems: "flex-start", flexWrap: "wrap" }}>
+                {/* Left Side: Detail & Tasks */}
+                <div style={{ flex: 1, minWidth: "400px", display: "flex", flexDirection: "column", gap: "24px" }}>
+
+                  {/* Top Card */}
+                  <div style={{
+                    backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0",
+                    padding: "32px", position: "relative"
+                  }}>
+                    <button style={{
+                      position: "absolute", top: "24px", right: "24px",
+                      width: "36px", height: "36px", borderRadius: "8px",
+                      border: "1px solid #e5e7eb", backgroundColor: "#ffffff",
+                      display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#111827"
+                    }}>
+                      <ShareIcon />
+                    </button>
+
+                    <div style={{ display: "flex", gap: "20px" }}>
+                      <div style={{
+                        width: "80px", height: "80px", borderRadius: "12px", backgroundColor: "#e0e7ff",
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                      }}>
+                        <UsersIcon />
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: 0 }}>Proyek Kelompok</h2>
+                          <span style={{ fontSize: "10px", fontWeight: 700, color: "#6b7280", backgroundColor: "#f3f4f6", padding: "4px 10px", borderRadius: "999px", letterSpacing: "0.04em" }}>MIDLE</span>
+                          <span style={{ fontSize: "10px", fontWeight: 700, color: "#4f46e5", backgroundColor: "#e0e7ff", padding: "4px 10px", borderRadius: "999px", letterSpacing: "0.04em" }}>WORK</span>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4b5563", backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: "6px", fontWeight: 500 }}>
+                            <SubtaskIcon /> 6 Subtasks
+                          </span>
+                          <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4b5563", backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: "6px", fontWeight: 500 }}>
+                            <CalendarSmIcon /> No due date
+                          </span>
+                        </div>
+
+                        <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.6, margin: 0, maxWidth: "340px" }}>
+                          A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tasks List Card */}
+                  <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "24px" }}>
+                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#111827", margin: "0 0 24px" }}>Preview Daftar Task</h3>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                      {["Diskusi & Pembagian Tugas", "Pengumpulan Data", "Analisis Data", "Penyusunan Laporan", "Revisi & Finalisasi", "Presentasi Hasil"].map((task, idx) => (
+                        <div key={idx} style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                          <div style={{
+                            width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#16a34a",
+                            color: "#ffffff", fontSize: "12px", fontWeight: 700,
+                            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                          }}>
+                            {idx + 1}
+                          </div>
+                          <span style={{ fontSize: "14px", color: "#374151", fontWeight: 500 }}>{task}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Template Information */}
+                <div style={{ width: "320px", backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "24px" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#111827", margin: "0 0 32px" }}>Template Information</h3>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "32px", marginBottom: "40px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#111827" }}>
+                        <WrenchIcon />
+                        <span style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280" }}>Made by</span>
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>BenToDo Official</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#111827" }}>
+                        <MailIcon />
+                        <span style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280" }}>Category</span>
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>Work</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#111827" }}>
+                        <UsersUpIcon />
+                        <span style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280" }}>Used</span>
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>1.2k times</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#111827" }}>
+                        <DownloadSquareIcon />
+                        <span style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280" }}>Last updated</span>
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>12 Mei 2025</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <button style={{
+                      width: "100%", height: "40px", borderRadius: "8px", backgroundColor: "#16a34a",
+                      color: "#ffffff", fontSize: "13px", fontWeight: 600, border: "none",
+                      cursor: "pointer", fontFamily: "inherit", transition: "background-color 0.15s"
+                    }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#15803d"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#16a34a"; }}
+                    >
+                      Use Template
+                    </button>
+                    <button style={{
+                      width: "100%", height: "40px", borderRadius: "8px", backgroundColor: "#ffffff",
+                      color: "#111827", fontSize: "13px", fontWeight: 600, border: "1px solid #e5e7eb",
+                      cursor: "pointer", fontFamily: "inherit", transition: "background-color 0.15s"
+                    }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f9fafb"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#ffffff"; }}
+                    >
+                      Save Template to Private
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+
+          {/* ── Create Template View ── */}
+          {activeMenu === "template" && templateView === "create" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <button
+                onClick={() => setTemplateView("list")}
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  background: "none", border: "none", cursor: "pointer",
+                  color: "#111827", fontSize: "14px", fontWeight: 500, fontFamily: "inherit", alignSelf: "flex-start"
+                }}
+              >
+                <ArrowLeftIcon /> Back
+              </button>
+
+              <div style={{
+                backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0",
+                padding: "32px", position: "relative", maxWidth: "800px"
+              }}>
+                <button style={{
+                  position: "absolute", top: "24px", right: "24px",
+                  width: "36px", height: "36px", borderRadius: "8px",
+                  border: "1px solid #e5e7eb", backgroundColor: "#ffffff",
+                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#111827"
+                }}>
+                  <ShareIcon />
+                </button>
+
+                <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>Create Template</h2>
+                <p style={{ fontSize: "13px", color: "#6b7280", margin: "0 0 32px" }}>Create a template according to your needs</p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  {/* Name Task */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "8px" }}>Name Task</label>
+                    <input
+                      type="text"
+                      value={newTemplate.title}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, title: e.target.value })}
+                      placeholder="Jadwal Kuliah"
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "0 16px", fontSize: "13px", fontFamily: "inherit", outline: "none" }}
+                    />
+                  </div>
+
+                  {/* Deskripsi */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "8px" }}>Deskripsi</label>
+                    <input
+                      type="text"
+                      value={newTemplate.desc}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, desc: e.target.value })}
+                      placeholder="Checklist jadwal kuliah tahun 2024/2025"
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "0 16px", fontSize: "13px", fontFamily: "inherit", outline: "none" }}
+                    />
+                  </div>
+
+                  {/* Deadline */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "8px" }}>Deadline (Opsional)</label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="text"
+                        value={newTemplate.deadline}
+                        onChange={(e) => setNewTemplate({ ...newTemplate, deadline: e.target.value })}
+                        placeholder="22 Juni 2025"
+                        style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "0 16px", fontSize: "13px", fontFamily: "inherit", outline: "none" }}
+                      />
+                      <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#6b7280", display: "flex" }}>
+                        <CalendarLineIcon />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "12px" }}>Category</label>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {["WORK", "DAILY", "HEALTH", "SHOPPING", "FINANCE", "GOALS"].map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setNewTemplate({ ...newTemplate, category: cat })}
+                          style={{
+                            padding: "6px 16px", borderRadius: "999px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", cursor: "pointer", border: "none",
+                            backgroundColor: newTemplate.category === cat ? "#818cf8" : "#e0e7ff",
+                            color: newTemplate.category === cat ? "#ffffff" : "#6366f1"
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Priority */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "12px" }}>Priority</label>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {["HIGH", "MIDLE", "LOW"].map((pri) => (
+                        <button
+                          key={pri}
+                          onClick={() => setNewTemplate({ ...newTemplate, priority: pri })}
+                          style={{
+                            padding: "6px 16px", borderRadius: "999px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", cursor: "pointer", border: "none",
+                            backgroundColor: newTemplate.priority === pri ? "#e5e7eb" : "#f3f4f6",
+                            color: newTemplate.priority === pri ? "#111827" : "#4b5563"
+                          }}
+                        >
+                          {pri}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "12px" }}>Status</label>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {[
+                        { id: "TO DO", bg: "#fecdd3", color: "#be123c", activeBg: "#fb7185", activeColor: "#fff" },
+                        { id: "DONE", bg: "#bbf7d0", color: "#166534", activeBg: "#4ade80", activeColor: "#fff" },
+                        { id: "IN PROGRES", bg: "#e0e7ff", color: "#4338ca", activeBg: "#818cf8", activeColor: "#fff" }
+                      ].map((st) => (
+                        <button
+                          key={st.id}
+                          onClick={() => setNewTemplate({ ...newTemplate, status: st.id })}
+                          style={{
+                            padding: "6px 16px", borderRadius: "999px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", cursor: "pointer", border: "none",
+                            backgroundColor: newTemplate.status === st.id ? st.activeBg : st.bg,
+                            color: newTemplate.status === st.id ? st.activeColor : st.color
+                          }}
+                        >
+                          {st.id}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Label */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#111827", marginBottom: "12px" }}>Label</label>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {[
+                        { id: "PUBLIC", bg: "#e5e7eb", color: "#4b5563", activeBg: "#9ca3af", activeColor: "#fff" },
+                        { id: "PRIVATE", bg: "#dcfce7", color: "#166534", activeBg: "#16a34a", activeColor: "#fff" }
+                      ].map((lbl) => (
+                        <button
+                          key={lbl.id}
+                          onClick={() => setNewTemplate({ ...newTemplate, label: lbl.id })}
+                          style={{
+                            padding: "6px 16px", borderRadius: "999px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", cursor: "pointer", border: "none",
+                            backgroundColor: newTemplate.label === lbl.id ? lbl.activeBg : lbl.bg,
+                            color: newTemplate.label === lbl.id ? lbl.activeColor : lbl.color
+                          }}
+                        >
+                          {lbl.id}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "16px" }}>
+                    <button
+                      onClick={() => setTemplateView("list")}
+                      style={{
+                        padding: "10px 32px", borderRadius: "8px", backgroundColor: "#ffffff",
+                        color: "#111827", fontSize: "13px", fontWeight: 600, border: "1px solid #e5e7eb",
+                        cursor: "pointer", fontFamily: "inherit"
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newTask = {
+                          id: templatesList.length + 1,
+                          title: newTemplate.title || "Untitled",
+                          desc: newTemplate.desc || "No description",
+                          level: newTemplate.priority as any,
+                          subtasks: 6,
+                          type: newTemplate.label === "PRIVATE" ? ["All", "Private"] : ["All", "Public"]
+                        };
+                        setTemplatesList([newTask, ...templatesList]);
+                        setTemplateView("success");
+                      }}
+                      style={{
+                        padding: "10px 32px", borderRadius: "8px", backgroundColor: "#16a34a",
+                        color: "#ffffff", fontSize: "13px", fontWeight: 600, border: "none",
+                        cursor: "pointer", fontFamily: "inherit"
+                      }}
+                    >
+                      Add Template
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Success View ── */}
+          {activeMenu === "template" && templateView === "success" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <button
+                onClick={() => setTemplateView("list")}
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  background: "none", border: "none", cursor: "pointer",
+                  color: "#111827", fontSize: "14px", fontWeight: 500, fontFamily: "inherit", alignSelf: "flex-start"
+                }}
+              >
+                <ArrowLeftIcon /> Back
+              </button>
+
+              <div style={{
+                backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0",
+                padding: "48px 32px", maxWidth: "800px", display: "flex", flexDirection: "column", alignItems: "center"
+              }}>
+                <SuccessCheckIcon />
+
+                <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: "24px 0 8px" }}>Template berhasil ditambahkan!</h2>
+                <p style={{ fontSize: "13px", color: "#6b7280", margin: "0 0 32px" }}>all tasks have been added to your task list</p>
+
+                <div style={{
+                  width: "100%", maxWidth: "600px", border: "1px solid #e5e7eb", borderRadius: "8px",
+                  padding: "24px", position: "relative", backgroundColor: "#fafafa"
+                }}>
+                  <span style={{
+                    position: "absolute", top: "24px", right: "24px",
+                    fontSize: "10px", fontWeight: 700, color: "#be123c", backgroundColor: "#fecdd3",
+                    padding: "4px 10px", borderRadius: "999px"
+                  }}>
+                    {newTemplate.status}
+                  </span>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
+                    <CheckCircleSolidIcon />
+                    <span style={{ fontSize: "20px", fontWeight: 600, color: "#111827" }}>{newTemplate.title || "Untitled"}</span>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginLeft: "40px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <PlusCircleIcon />
+                      <span style={{ fontSize: "13px", color: "#374151" }}>Subtask : 6 tasks added</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <PlusCircleIcon />
+                      <span style={{ fontSize: "13px", color: "#374151" }}>Deadline : {newTemplate.deadline || "None"}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <PlusCircleIcon />
+                      <span style={{ fontSize: "13px", color: "#374151" }}>Prioritas : {newTemplate.priority}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <PlusCircleIcon />
+                      <span style={{ fontSize: "13px", color: "#374151", display: "flex", alignItems: "center", gap: "8px" }}>
+                        Label : {newTemplate.label === "PRIVATE" ? "Private" : "Public"}
+                        <span style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: newTemplate.label === "PRIVATE" ? "#16a34a" : "#9ca3af" }} />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ width: "100%", maxWidth: "600px", display: "flex", justifyContent: "flex-end", marginTop: "32px" }}>
+                  <button
+                    onClick={() => {
+                      setTemplateFilter(newTemplate.label === "PRIVATE" ? "Private" : "Public");
+                      setTemplateView("list");
+                    }}
+                    style={{
+                      padding: "10px 32px", borderRadius: "8px", backgroundColor: "#16a34a",
+                      color: "#ffffff", fontSize: "13px", fontWeight: 600, border: "none",
+                      cursor: "pointer", fontFamily: "inherit"
+                    }}
+                  >
+                    See Template
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
       </main>

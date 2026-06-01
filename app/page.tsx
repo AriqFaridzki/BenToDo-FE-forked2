@@ -79,6 +79,13 @@ export default function SignInPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
+    // Temporary bypass for frontend testing
+    if (email === "admin123@gmail.com" && password === "123admin321") {
+      router.push("/dashboard");
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/v1/auth/login", {
         method: "POST",
