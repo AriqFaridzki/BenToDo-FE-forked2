@@ -1,14 +1,54 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  applyTemplate,
+  clearAuthSession,
+  getAuthToken,
+  getDashboardZen,
+  getEnergySummary,
+  getStoredUser,
+  getTasks,
+  getTemplates,
+  startFocusSession,
+  updateTask,
+} from "../lib/api";
+import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
+
+const COLOR = {
+  primary: "#008B1F",
+  primaryHover: "#007A1B",
+  primarySoft: "#9CFFAD",
+  primaryPale: "#ECFFF0",
+  border: "#D9D9D9",
+  borderSoft: "#ECECEC",
+  surface: "#FFFFFF",
+  panel: "#F5F5F5",
+  text: "#1E1E1E",
+  muted: "#8A8A8A",
+  mutedDark: "#666666",
+  danger: "#FF6B76",
+  dangerSoft: "#FFCDD2",
+};
+
+const CARD_STYLE = {
+  backgroundColor: COLOR.surface,
+  borderRadius: "8px",
+  border: `1px solid ${COLOR.border}`,
+} as const;
+
+const buttonReset = {
+  border: "none",
+  background: "none",
+  fontFamily: "inherit",
+  cursor: "pointer",
+} as const;
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 
 const DashboardIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="7" height="7" rx="1" />
     <rect x="14" y="3" width="7" height="7" rx="1" />
     <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -17,7 +57,7 @@ const DashboardIcon = () => (
 );
 
 const TaskIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
     <rect x="9" y="3" width="6" height="4" rx="1" />
     <path d="m9 14 2 2 4-4" />
@@ -25,14 +65,14 @@ const TaskIcon = () => (
 );
 
 const TemplateIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" />
   </svg>
 );
 
 const SignOutIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
     <polyline points="16 17 21 12 16 7" />
     <line x1="21" y1="12" x2="9" y2="12" />
@@ -40,41 +80,41 @@ const SignOutIcon = () => (
 );
 
 const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8" />
     <line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
 
 const BellIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
 );
 
 const PlayIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
     <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
 
 const CheckSquareIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLOR.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 11 12 14 22 4" />
     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
   </svg>
 );
 
 const ClockAlertIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLOR.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" />
     <polyline points="12 6 12 12 16 14" />
   </svg>
 );
 
 const AlertTriangleIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLOR.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
     <line x1="12" y1="9" x2="12" y2="13" />
     <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -82,7 +122,7 @@ const AlertTriangleIcon = () => (
 );
 
 const BatteryIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COLOR.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="1" y="6" width="18" height="12" rx="2" ry="2" />
     <line x1="23" y1="13" x2="23" y2="11" />
   </svg>
@@ -135,21 +175,21 @@ const MoreDotsIcon = () => (
 );
 
 const TrendUpIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={COLOR.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
     <polyline points="17 6 23 6 23 12" />
   </svg>
 );
 
 const TrendDownIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={COLOR.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
     <polyline points="17 18 23 18 23 12" />
   </svg>
 );
 
 const CompassIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="5" r="2" />
     <path d="M10.585 6.415l-6.585 13.585" />
     <path d="M13.415 6.415l6.585 13.585" />
@@ -224,14 +264,14 @@ const CalendarLineIcon = () => (
 
 const SuccessCheckIcon = () => (
   <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
-    <circle cx="60" cy="60" r="50" stroke="#16a34a" strokeWidth="8" />
-    <path d="M35 60l15 15 35-35" stroke="#16a34a" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M20 30l5 5M90 20l5-5M100 80l-5 5" stroke="#16a34a" strokeWidth="4" strokeLinecap="round" />
+    <circle cx="60" cy="60" r="50" stroke={COLOR.primary} strokeWidth="8" />
+    <path d="M35 60l15 15 35-35" stroke={COLOR.primary} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 30l5 5M90 20l5-5M100 80l-5 5" stroke={COLOR.primary} strokeWidth="4" strokeLinecap="round" />
   </svg>
 );
 
 const CheckCircleSolidIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="#16a34a">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={COLOR.primary}>
     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
   </svg>
 );
@@ -251,11 +291,11 @@ function TrendBadge({ value, up }: { value: string; up: boolean }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: "3px",
-        fontSize: "11px",
-        fontWeight: 600,
-        color: up ? "#16a34a" : "#ef4444",
-        backgroundColor: up ? "#f0fdf4" : "#fef2f2",
+        gap: "2px",
+        fontSize: "12px",
+        fontWeight: 700,
+        color: up ? COLOR.primary : "#D62839",
+        backgroundColor: up ? "#BDFCC8" : COLOR.dangerSoft,
         borderRadius: "999px",
         padding: "2px 8px",
       }}
@@ -270,23 +310,24 @@ function TrendBadge({ value, up }: { value: string; up: boolean }) {
 
 function PriorityBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
   const map = {
-    HIGH: { bg: "#16a34a", text: "#fff" },
-    MEDIUM: { bg: "#f59e0b", text: "#fff" },
-    LOW: { bg: "#ef4444", text: "#fff" },
+    HIGH: { bg: "#6D6D6D", text: "#fff" },
+    MEDIUM: { bg: "#7B7B7B", text: "#fff" },
+    LOW: { bg: "#8E8E8E", text: "#fff" },
   };
   const { bg, text } = map[level];
   return (
     <span
       style={{
         display: "inline-block",
-        fontSize: "10px",
+        fontSize: "11px",
         fontWeight: 700,
         letterSpacing: "0.04em",
         color: text,
         backgroundColor: bg,
-        borderRadius: "4px",
-        padding: "2px 10px",
-        lineHeight: "18px",
+        borderRadius: "999px",
+        padding: "3px 10px",
+        lineHeight: "16px",
+        flexShrink: 0,
       }}
     >
       {level}
@@ -297,8 +338,7 @@ function PriorityBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
 // ─── Mini Line Chart (SVG) ────────────────────────────────────────────────────
 
 function ProductivityChart() {
-  // Example data points
-  const data = [3, 2, 4, 3.5, 3, 3.5, 3.8, 3.5, 3.5, 4, 3.5, 1];
+  const data = [3, 4, 2, 3, 3, 4, 1];
   const width = 520;
   const height = 220;
   const padX = 40;
@@ -312,6 +352,11 @@ function ProductivityChart() {
     const y = padY + chartH - (v / maxVal) * chartH;
     return `${x},${y}`;
   });
+  const areaPoints = [
+    `${padX},${height - padY}`,
+    ...points,
+    `${width - padX},${height - padY}`,
+  ].join(" ");
 
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const yLabels = [0, 1, 2, 3, 4, 5, 6];
@@ -323,8 +368,8 @@ function ProductivityChart() {
         const y = padY + chartH - (v / maxVal) * chartH;
         return (
           <g key={v}>
-            <text x={padX - 12} y={y + 4} textAnchor="end" fontSize="11" fill="#9ca3af">{v}</text>
-            <line x1={padX} y1={y} x2={width - padX} y2={y} stroke="#f3f4f6" strokeWidth="1" />
+            <text x={padX - 12} y={y + 4} textAnchor="end" fontSize="9" fill={COLOR.muted}>{v}</text>
+            <line x1={padX} y1={y} x2={width - padX} y2={y} stroke="#E8E8E8" strokeWidth="1" />
           </g>
         );
       })}
@@ -332,14 +377,15 @@ function ProductivityChart() {
       {days.map((d, i) => {
         const x = padX + (i / (days.length - 1)) * chartW;
         return (
-          <text key={d} x={x} y={height + 16} textAnchor="middle" fontSize="10" fill="#9ca3af">{d}</text>
+          <text key={d} x={x} y={height + 16} textAnchor="middle" fontSize="8" fill={COLOR.text}>{d}</text>
         );
       })}
+      <polygon points={areaPoints} fill="#EEFFF0" opacity="0.95" />
       {/* Line */}
       <polyline
         points={points.join(" ")}
         fill="none"
-        stroke="#16a34a"
+        stroke={COLOR.primary}
         strokeWidth="2"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -348,7 +394,7 @@ function ProductivityChart() {
       {data.map((v, i) => {
         const x = padX + (i / (data.length - 1)) * chartW;
         const y = padY + chartH - (v / maxVal) * chartH;
-        return <circle key={i} cx={x} cy={y} r="3" fill="#16a34a" />;
+        return <circle key={i} cx={x} cy={y} r="3" fill={COLOR.primary} />;
       })}
     </svg>
   );
@@ -389,6 +435,84 @@ const templatesData = [
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
+type PriorityLevel = "HIGH" | "MEDIUM" | "LOW";
+
+type ViewTask = {
+  id?: string;
+  title: string;
+  level: PriorityLevel;
+  subtask: string;
+  date: string;
+  done?: boolean;
+  status?: TaskStatus;
+};
+
+type ViewCard = {
+  id: number;
+  backendKey?: string;
+  taskId?: string;
+  title: string;
+  desc: string;
+  level: string;
+  subtasks: number;
+  type: string[];
+  previewItems?: TaskTemplate["preview_items"];
+};
+
+const mapEnergyToLevel = (energyWeight: EnergyWeight): PriorityLevel => {
+  if (energyWeight === "Berat") return "HIGH";
+  if (energyWeight === "Sedang") return "MEDIUM";
+  return "LOW";
+};
+
+const formatDate = (value: string | null) => {
+  if (!value) return "No due date";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+};
+
+const mapTaskToViewTask = (task: Task): ViewTask => ({
+  id: task.id,
+  title: task.title,
+  level: mapEnergyToLevel(task.energy_weight),
+  subtask: task.source_template ? `Template: ${task.source_template}` : task.status,
+  date: formatDate(task.deadline),
+  done: task.status === "done",
+  status: task.status,
+});
+
+const mapTemplateToCard = (template: TaskTemplate, index: number): ViewCard => ({
+  id: index + 1,
+  backendKey: template.key,
+  title: template.name,
+  desc: template.description,
+  level: "OFFICIAL",
+  subtasks: template.total_items,
+  type: ["All", "Public"],
+  previewItems: template.preview_items,
+});
+
+const mapTaskToCard = (task: Task, index: number): ViewCard => ({
+  id: index + 1,
+  taskId: task.id,
+  title: task.title,
+  desc: task.source_template
+    ? `Task dari template ${task.source_template}`
+    : `Status: ${task.status.replace("_", " ")}`,
+  level: mapEnergyToLevel(task.energy_weight),
+  subtasks: task.used_timer ? task.timer_duration ?? 0 : 0,
+  type: ["All", task.status === "done" ? "Public" : "Private"],
+});
+
+const getDisplayName = () => {
+  const user = getStoredUser();
+  return user?.display_name || user?.email?.split("@")[0] || "User";
+};
+
 export default function DashboardPage() {
   const router = useRouter();
   const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
@@ -397,7 +521,13 @@ export default function DashboardPage() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
-  const [templatesList, setTemplatesList] = useState(templatesData);
+  const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
+  const [apiTasks, setApiTasks] = useState<Task[]>([]);
+  const [displayName, setDisplayName] = useState("User");
+  const [energyPercent, setEnergyPercent] = useState(0);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [deadlineStats, setDeadlineStats] = useState({ upcoming: 0, overdue: 0 });
 
   const [newTemplate, setNewTemplate] = useState({
     title: "",
@@ -409,54 +539,210 @@ export default function DashboardPage() {
     label: "PRIVATE"
   });
 
+  const loadDashboardData = useCallback(async (silent = false) => {
+    if (!getAuthToken()) {
+      router.replace("/");
+      return;
+    }
+
+    if (!silent) setNotice(null);
+
+    try {
+      const [tasksResult, zenResult, templatesResult, energyResult] =
+        await Promise.all([
+          getTasks(1, 50),
+          getDashboardZen(),
+          getTemplates(),
+          getEnergySummary(),
+        ]);
+
+      setDisplayName(getDisplayName());
+      setApiTasks(tasksResult.data);
+      setTemplatesList(templatesResult.data.map(mapTemplateToCard));
+      const currentTime = Date.now();
+      setDeadlineStats({
+        upcoming: tasksResult.data.filter((task) => {
+          if (!task.deadline || task.status === "done") return false;
+          const deadline = new Date(task.deadline).getTime();
+          return deadline >= currentTime && deadline <= currentTime + 7 * 24 * 60 * 60 * 1000;
+        }).length,
+        overdue: tasksResult.data.filter((task) => {
+          return task.deadline &&
+            task.status !== "done" &&
+            new Date(task.deadline).getTime() < currentTime;
+        }).length,
+      });
+      setEnergyPercent(
+        Math.round(
+          (energyResult.data.current_energy / energyResult.data.max_energy) *
+            100,
+        ),
+      );
+
+      if (zenResult.hidden_message) {
+        setNotice(zenResult.hidden_message);
+      }
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Gagal memuat data dashboard.",
+      );
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadDashboardData();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadDashboardData]);
+
+  const filteredTasks = useMemo(() => {
+    const keyword = searchTask.trim().toLowerCase();
+    const tasks = apiTasks.map(mapTaskToViewTask);
+
+    if (!keyword) return tasks;
+
+    return tasks.filter((task) =>
+      `${task.title} ${task.subtask} ${task.date}`.toLowerCase().includes(keyword),
+    );
+  }, [apiTasks, searchTask]);
+
+  const priorityTaskItems = useMemo<ViewTask[]>(() => {
+    const activeTasks = apiTasks
+      .filter((task) => task.status !== "done")
+      .sort((a, b) => {
+        const aDeadline = a.deadline ? new Date(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+        const bDeadline = b.deadline ? new Date(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+
+        return aDeadline - bDeadline;
+      })
+      .slice(0, 3)
+      .map(mapTaskToViewTask);
+
+    return activeTasks.length > 0 ? activeTasks : priorityTasks;
+  }, [apiTasks]);
+
+  const recentTaskItems: ViewTask[] = filteredTasks.length > 0 ? filteredTasks : recentTasks;
+
+  const taskCards = useMemo(() => {
+    return apiTasks.map(mapTaskToCard);
+  }, [apiTasks]);
+
+  const cardItems = activeMenu === "task" ? taskCards : templatesList;
+  const selectedCard = templatesList.find((item) => item.id === selectedTemplateId) ?? null;
+  const completedCount = apiTasks.filter((task) => task.status === "done").length;
+  const upcomingDeadlineCount = deadlineStats.upcoming;
+  const overdueCount = deadlineStats.overdue;
+
   const handleSignOut = () => {
-    localStorage.removeItem("bentodo_token");
-    sessionStorage.removeItem("bentodo_token");
+    clearAuthSession();
     router.push("/");
   };
 
+  const handleToggleTaskStatus = async (task: ViewTask, checked: boolean) => {
+    if (!task.id) return;
+
+    setIsActionLoading(true);
+    try {
+      await updateTask(task.id, { status: checked ? "done" : "pending" });
+      await loadDashboardData(true);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Gagal update task.");
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleStartFocus = async (taskId?: string) => {
+    if (!taskId) return;
+
+    setIsActionLoading(true);
+    try {
+      await startFocusSession(taskId);
+      setNotice("Sesi fokus berhasil dimulai.");
+      await loadDashboardData(true);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Gagal memulai fokus.");
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleUseCard = async (item: ViewCard) => {
+    if (activeMenu === "task") {
+      await handleStartFocus(item.taskId);
+      return;
+    }
+
+    if (!item.backendKey) {
+      setSelectedTemplateId(item.id);
+      setTemplateView("detail");
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      await applyTemplate(item.backendKey);
+      setNotice(`Template ${item.title} berhasil diterapkan.`);
+      setActiveMenu("task");
+      await loadDashboardData(true);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Gagal menerapkan template.");
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#fafafa", fontFamily: "inherit" }}>
+    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: COLOR.surface, color: COLOR.text, fontFamily: "inherit" }}>
 
       {/* ═══════════════════════════════════════
           SIDEBAR
       ═══════════════════════════════════════ */}
       <aside
         style={{
-          width: "220px",
+          width: "210px",
           minHeight: "100vh",
-          backgroundColor: "#ffffff",
-          borderRight: "1px solid #f0f0f0",
+          backgroundColor: COLOR.surface,
+          borderRight: `1px solid ${COLOR.borderSoft}`,
           display: "flex",
           flexDirection: "column",
-          padding: "24px 0",
+          padding: "24px 0 0",
           position: "sticky",
           top: 0,
           flexShrink: 0,
         }}
       >
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 20px", marginBottom: "32px" }}>
-          <Image
-            src="/Logo BenTodo.png"
-            alt="Ben To Do Logo"
-            width={36}
-            height={36}
-            style={{ width: "36px", height: "auto" }}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "0 28px", marginBottom: "38px" }}>
+          <span
+            aria-label="Ben To Do Logo"
+            style={{
+              width: "32px",
+              height: "32px",
+              display: "inline-block",
+              backgroundColor: COLOR.primary,
+              WebkitMask: "url('/Logo BenTodo.png') center / contain no-repeat",
+              mask: "url('/Logo BenTodo.png') center / contain no-repeat",
+              flexShrink: 0,
+            }}
           />
           <div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>Ben To Do</div>
-            <div style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 400 }}>Task Dashboard</div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: COLOR.text, lineHeight: 1.1 }}>Ben To Do</div>
+            <div style={{ fontSize: "11px", color: COLOR.text, fontWeight: 400, lineHeight: 1.15 }}>Task Dashboard</div>
           </div>
         </div>
 
         {/* Menu Label */}
-        <div style={{ fontSize: "11px", fontWeight: 600, color: "#9ca3af", letterSpacing: "0.06em", padding: "0 20px", marginBottom: "8px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 600, color: COLOR.text, letterSpacing: "0", padding: "0 28px", marginBottom: "14px" }}>
           MENU
         </div>
 
         {/* Nav Items */}
-        <nav style={{ display: "flex", flexDirection: "column", gap: "2px", padding: "0 12px" }}>
+        <nav style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "0 24px" }}>
           {[
             { key: "dashboard", label: "DashBoard", icon: <DashboardIcon /> },
             { key: "task", label: "Task", icon: <TaskIcon /> },
@@ -472,22 +758,23 @@ export default function DashboardPage() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                padding: "10px 14px",
-                borderRadius: "8px",
+                gap: "11px",
+                height: "42px",
+                padding: "0 14px",
+                borderRadius: "4px",
                 border: "none",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 fontSize: "13px",
                 fontWeight: activeMenu === key ? 600 : 400,
-                color: activeMenu === key ? "#ffffff" : "#6b7280",
-                backgroundColor: activeMenu === key ? "#16a34a" : "transparent",
+                color: activeMenu === key ? COLOR.primary : COLOR.mutedDark,
+                backgroundColor: activeMenu === key ? COLOR.primarySoft : "transparent",
                 transition: "all 0.15s",
                 width: "100%",
                 textAlign: "left",
               }}
             >
-              <span style={{ display: "flex", color: activeMenu === key ? "#ffffff" : "#9ca3af" }}>
+              <span style={{ display: "flex", color: activeMenu === key ? COLOR.primary : COLOR.mutedDark }}>
                 {icon}
               </span>
               {label}
@@ -499,21 +786,22 @@ export default function DashboardPage() {
         <div style={{ flex: 1 }} />
 
         {/* Sign Out */}
-        <div style={{ padding: "0 12px" }}>
+        <div style={{ padding: "22px 24px", borderTop: `1px solid ${COLOR.borderSoft}` }}>
           <button
             onClick={handleSignOut}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "10px",
-              padding: "10px 14px",
-              borderRadius: "8px",
+              gap: "11px",
+              height: "36px",
+              padding: "0 12px",
+              borderRadius: "3px",
               border: "none",
               cursor: "pointer",
               fontFamily: "inherit",
               fontSize: "13px",
               fontWeight: 400,
-              color: "#6b7280",
+              color: COLOR.mutedDark,
               backgroundColor: "transparent",
               transition: "all 0.15s",
               width: "100%",
@@ -537,15 +825,16 @@ export default function DashboardPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "16px 32px",
-            backgroundColor: "#ffffff",
-            borderBottom: "1px solid #f0f0f0",
+            height: "64px",
+            padding: "0 32px",
+            backgroundColor: COLOR.surface,
+            borderBottom: `1px solid ${COLOR.borderSoft}`,
             position: "sticky",
             top: 0,
             zIndex: 20,
           }}
         >
-          <h1 style={{ fontSize: "18px", fontWeight: 700, color: "#111827", margin: 0 }}>
+          <h1 style={{ fontSize: "18px", fontWeight: 400, color: COLOR.text, margin: 0 }}>
             {activeMenu === "dashboard" ? "Dashboard" :
               activeMenu === "task" ? "Task" :
                 templateView === "create" ? "Create Template" :
@@ -554,27 +843,27 @@ export default function DashboardPage() {
           </h1>
 
           {/* Search + Notification + Profile */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             {/* Search */}
             <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex" }}>
+              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: COLOR.muted, display: "flex" }}>
                 <SearchIcon />
               </span>
               <input
                 type="text"
-                placeholder="Search task"
+                placeholder={activeMenu === "template" ? "Search template" : "Search task"}
                 value={searchTask}
                 onChange={(e) => setSearchTask(e.target.value)}
                 style={{
-                  width: "200px",
-                  height: "36px",
-                  borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
+                  width: "260px",
+                  height: "32px",
+                  borderRadius: "3px",
+                  border: `1px solid ${COLOR.border}`,
                   paddingLeft: "36px",
                   paddingRight: "12px",
-                  fontSize: "13px",
-                  color: "#111827",
-                  backgroundColor: "#ffffff",
+                  fontSize: "12px",
+                  color: COLOR.text,
+                  backgroundColor: COLOR.surface,
                   outline: "none",
                   fontFamily: "inherit",
                 }}
@@ -587,12 +876,12 @@ export default function DashboardPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "36px",
-                height: "36px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
+                width: "32px",
+                height: "32px",
+                borderRadius: "3px",
+                border: `1px solid ${COLOR.border}`,
                 background: "none",
-                color: "#6b7280",
+                color: COLOR.mutedDark,
                 cursor: "pointer",
               }}
             >
@@ -600,55 +889,72 @@ export default function DashboardPage() {
             </button>
 
             {/* User Avatar + Name */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingLeft: "12px", borderLeft: `1px solid ${COLOR.borderSoft}` }}>
               <div
                 style={{
-                  width: "36px",
-                  height: "36px",
+                  width: "38px",
+                  height: "38px",
                   borderRadius: "50%",
-                  backgroundColor: "#e5e7eb",
+                  background: "linear-gradient(135deg, #6EE7F9 0%, #0F766E 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: "#6b7280",
+                  color: "#ffffff",
                 }}
               >
-                A
+                {displayName.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: "#111827", lineHeight: 1.2 }}>
-                  Ariqmuzakki
+                <div style={{ fontSize: "12px", fontWeight: 700, color: COLOR.text, lineHeight: 1.15 }}>
+                  {displayName}
                 </div>
-                <div style={{ fontSize: "11px", color: "#9ca3af" }}>My Workspace</div>
+                <div style={{ fontSize: "9px", color: COLOR.text, lineHeight: 1.2 }}>My Workspace</div>
               </div>
             </div>
           </div>
         </header>
 
         {/* ── Scrollable Content ── */}
-        <div style={{ flex: 1, padding: "24px 32px", overflowY: "auto" }}>
+        <div style={{ flex: 1, padding: "26px 32px 38px", overflowY: "auto", overflowX: "hidden" }}>
+          {notice && (
+            <div
+              style={{
+                backgroundColor: "#f0fdf4",
+                color: "#166534",
+                padding: "12px 16px",
+                borderRadius: "8px",
+                fontSize: "13px",
+                fontWeight: 600,
+                marginBottom: "16px",
+                border: "1px solid #bbf7d0",
+              }}
+            >
+              {notice}
+            </div>
+          )}
 
           {/* Welcome + Time Range + Focus Timer */}
           {(activeMenu === "dashboard" || (activeMenu === "template" && templateView === "list") || activeMenu === "task") && (
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", width: "100%", marginBottom: "32px", gap: "24px" }}>
               <div>
-                <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
-                  Welcome, Ariqmuzakki
+                <h2 style={{ fontSize: "26px", fontWeight: 700, color: COLOR.text, margin: "0 0 6px", lineHeight: 1.15 }}>
+                  Welcome, {displayName}
                 </h2>
-                <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>
+                <p style={{ fontSize: "12px", color: COLOR.text, margin: 0, lineHeight: 1.4 }}>
                   Here&apos;s what&apos;s happening with your workspace today.
                 </p>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
                 {/* Toggle Buttons */}
                 <div
                   style={{
                     display: "flex",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
+                    borderRadius: "3px",
+                    backgroundColor: "#F1F1F1",
+                    padding: "2px",
                     overflow: "hidden",
                   }}
                 >
@@ -658,14 +964,14 @@ export default function DashboardPage() {
                         key={t}
                         onClick={() => setTimeRange(t)}
                         style={{
-                          padding: "8px 16px",
-                          fontSize: "12px",
+                          width: "64px",
+                          height: "32px",
+                          fontSize: "11px",
                           fontWeight: timeRange === t ? 600 : 400,
                           fontFamily: "inherit",
-                          color: timeRange === t ? "#111827" : "#9ca3af",
-                          backgroundColor: timeRange === t ? "#f9fafb" : "#ffffff",
+                          color: COLOR.text,
+                          backgroundColor: timeRange === t ? COLOR.surface : "transparent",
                           border: "none",
-                          borderRight: "1px solid #e5e7eb",
                           cursor: "pointer",
                           transition: "all 0.15s",
                         }}
@@ -679,14 +985,14 @@ export default function DashboardPage() {
                         key={t}
                         onClick={() => setTemplateFilter(t)}
                         style={{
-                          padding: "8px 16px",
-                          fontSize: "12px",
+                          width: "64px",
+                          height: "32px",
+                          fontSize: "11px",
                           fontWeight: templateFilter === t ? 600 : 400,
                           fontFamily: "inherit",
-                          color: templateFilter === t ? "#111827" : "#9ca3af",
-                          backgroundColor: templateFilter === t ? "#ffffff" : "#f3f4f6",
+                          color: COLOR.text,
+                          backgroundColor: templateFilter === t ? COLOR.surface : "transparent",
                           border: "none",
-                          borderRight: t !== "Private" ? "1px solid #e5e7eb" : "none",
                           cursor: "pointer",
                           transition: "all 0.15s",
                         }}
@@ -700,15 +1006,21 @@ export default function DashboardPage() {
                 {/* Start Focus Timer Button */}
                 <button
                   onClick={() => {
+                    if (activeMenu === "dashboard") {
+                      void handleStartFocus(priorityTaskItems[0]?.id);
+                    }
                     if (activeMenu === "template") setTemplateView("create");
                   }}
                   style={{
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "center",
                     gap: "8px",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    backgroundColor: "#16a34a",
+                    minWidth: activeMenu === "dashboard" ? "158px" : "160px",
+                    height: "34px",
+                    padding: "0 16px",
+                    borderRadius: "4px",
+                    backgroundColor: COLOR.primary,
                     color: "#ffffff",
                     fontSize: "13px",
                     fontWeight: 600,
@@ -732,56 +1044,59 @@ export default function DashboardPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: "16px",
-                  marginBottom: "24px",
+                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                  gap: "clamp(16px, 2vw, 32px)",
+                  marginBottom: "32px",
                 }}
               >
                 {/* Task Completed */}
-                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px" }}>
-                  <div style={{ fontSize: "12px", color: "#9ca3af", fontWeight: 500, marginBottom: "12px" }}>Task Completed</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "100px", padding: "16px clamp(18px, 2.8vw, 48px)", boxSizing: "border-box" }}>
+                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, marginBottom: "12px", lineHeight: 1.1 }}>Task Completed</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                     <CheckSquareIcon />
-                    <span style={{ fontSize: "28px", fontWeight: 700, color: "#111827" }}>128</span>
+                    <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{completedCount}</span>
                     <TrendBadge value="+10%" up />
                   </div>
-                  <div style={{ fontSize: "11px", color: "#d1d5db" }}>from last week</div>
+                  <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1 }}>from last week</div>
                 </div>
 
                 {/* Upcoming Deadlines */}
-                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px" }}>
-                  <div style={{ fontSize: "12px", color: "#9ca3af", fontWeight: 500, marginBottom: "12px" }}>Upcoming Deadlines</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "100px", padding: "16px clamp(18px, 2.8vw, 48px)", boxSizing: "border-box" }}>
+                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, marginBottom: "12px", lineHeight: 1.1 }}>Upcoming Deadlines</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                     <ClockAlertIcon />
-                    <span style={{ fontSize: "28px", fontWeight: 700, color: "#111827" }}>50</span>
+                    <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{upcomingDeadlineCount}</span>
                     <TrendBadge value="+10%" up />
                   </div>
-                  <div style={{ fontSize: "11px", color: "#d1d5db" }}>from last week</div>
+                  <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1 }}>from last week</div>
                 </div>
 
                 {/* Overdue Task */}
-                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px" }}>
-                  <div style={{ fontSize: "12px", color: "#9ca3af", fontWeight: 500, marginBottom: "12px" }}>Overdue Task</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "100px", padding: "16px clamp(18px, 2.8vw, 48px)", boxSizing: "border-box" }}>
+                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, marginBottom: "12px", lineHeight: 1.1 }}>Overdue Task</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                     <AlertTriangleIcon />
-                    <span style={{ fontSize: "28px", fontWeight: 700, color: "#111827" }}>9000</span>
+                    <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{overdueCount}</span>
                     <TrendBadge value="-10%" up={false} />
                   </div>
-                  <div style={{ fontSize: "11px", color: "#d1d5db" }}>from last week</div>
+                  <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1 }}>from last week</div>
                 </div>
 
                 {/* Energy */}
-                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px" }}>
-                  <div style={{ fontSize: "12px", color: "#9ca3af", fontWeight: 500, marginBottom: "12px" }}>Energy</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "100px", padding: "16px clamp(18px, 2.8vw, 48px)", boxSizing: "border-box" }}>
+                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, marginBottom: "12px", lineHeight: 1.1 }}>Energy</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
                     <BatteryIcon />
-                    <span style={{ fontSize: "20px", fontWeight: 700, color: "#111827" }}>76%</span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{energyPercent}%</span>
                   </div>
                   {/* Progress bar */}
-                  <div style={{ width: "100%", height: "8px", backgroundColor: "#e5e7eb", borderRadius: "999px", marginBottom: "8px" }}>
-                    <div style={{ width: "76%", height: "100%", backgroundColor: "#16a34a", borderRadius: "999px", transition: "width 0.5s" }} />
+                  <div style={{ width: "100%", height: "6px", backgroundColor: "#E1E1E1", borderRadius: "999px", marginBottom: "7px" }}>
+                    <div style={{ width: `${Math.min(energyPercent, 100)}%`, height: "100%", backgroundColor: COLOR.primary, borderRadius: "999px", transition: "width 0.5s" }} />
                   </div>
-                  <div style={{ fontSize: "11px", color: "#16a34a", fontWeight: 500 }}>▸ Ready for do Task</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.primary, fontWeight: 600 }}>
+                    <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: COLOR.primary, display: "inline-block" }} />
+                    Ready for do Task
+                  </div>
                 </div>
               </div>
 
@@ -789,37 +1104,41 @@ export default function DashboardPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "340px 1fr",
-                  gap: "16px",
-                  marginBottom: "24px",
+                  gridTemplateColumns: "minmax(340px, 1.2fr) minmax(0, 2.6fr)",
+                  gridTemplateRows: "auto auto",
+                  gap: "clamp(22px, 2.6vw, 40px)",
+                  width: "100%",
+                  marginBottom: "32px",
+                  alignItems: "stretch",
                 }}
               >
                 {/* Priority Task Card */}
-                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                    <span style={{ fontSize: "15px", fontWeight: 700, color: "#111827" }}>Priority Task</span>
-                    <span style={{ fontSize: "12px", color: "#9ca3af", cursor: "pointer" }}>View all</span>
+                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
+                    <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Priority Task</span>
+                    <span style={{ fontSize: "12px", color: COLOR.mutedDark, cursor: "pointer", lineHeight: 1 }}>View all</span>
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {priorityTasks.map((task) => (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                    {priorityTaskItems.map((task) => (
                       <div
                         key={task.title}
                         style={{
-                          backgroundColor: "#f9fafb",
-                          borderRadius: "10px",
-                          padding: "14px 16px",
+                          backgroundColor: "#F1F1F1",
+                          borderRadius: "7px",
+                          padding: "18px clamp(16px, 1.8vw, 24px)",
+                          minHeight: "80px",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-                          <span style={{ fontSize: "13px", fontWeight: 600, color: "#111827" }}>{task.title}</span>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "15px", gap: "14px" }}>
+                          <span style={{ flex: 1, minWidth: 0, fontSize: "14px", fontWeight: 700, color: COLOR.text, lineHeight: 1.25, whiteSpace: "normal", wordBreak: "normal", overflowWrap: "break-word" }}>{task.title}</span>
                           <PriorityBadge level={task.level} />
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "#9ca3af" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
                             <SubtaskIcon /> {task.subtask}
                           </span>
-                          <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "#9ca3af" }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
                             <CalendarSmIcon /> {task.date}
                           </span>
                         </div>
@@ -829,29 +1148,78 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Productivity Overview Chart */}
-                <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                    <span style={{ fontSize: "15px", fontWeight: 700, color: "#111827" }}>Productivity Overview</span>
+                <div style={{ ...CARD_STYLE, padding: "24px clamp(18px, 2vw, 32px)", gridColumn: "2", gridRow: "1 / span 2", minHeight: "386px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+                    <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Productivity Overview</span>
                     <button
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px",
-                        padding: "6px 14px",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        backgroundColor: "#ffffff",
-                        fontSize: "12px",
-                        color: "#6b7280",
+                        gap: "5px",
+                        height: "28px",
+                        padding: "0 12px",
+                        borderRadius: "4px",
+                        border: `1px solid ${COLOR.border}`,
+                        backgroundColor: COLOR.surface,
+                        fontSize: "11px",
+                        color: COLOR.text,
                         cursor: "pointer",
                         fontFamily: "inherit",
                       }}
                     >
-                      <CalendarSmIcon /> This Week ▾
+                      <CalendarSmIcon /> This Week
                     </button>
                   </div>
-                  <div style={{ width: "100%", height: "240px" }}>
+                  <div style={{ width: "100%", flex: 1, minHeight: "300px" }}>
                     <ProductivityChart />
+                  </div>
+                </div>
+
+                <div style={{ ...CARD_STYLE, width: "100%", padding: "12px 14px", minHeight: "86px", boxSizing: "border-box", gridColumn: "1" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "9px" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: COLOR.text }}>Calendar</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <button style={{ ...buttonReset, color: COLOR.text, display: "flex" }}>
+                        <ChevronLeftIcon />
+                      </button>
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: COLOR.text }}>June 2026</span>
+                      <button style={{ ...buttonReset, color: COLOR.text, display: "flex" }}>
+                        <ChevronRightIcon />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", textAlign: "center", marginBottom: "5px" }}>
+                    {calendarDays.map((d) => (
+                      <span key={d} style={{ fontSize: "8px", fontWeight: 600, color: COLOR.text }}>{d}</span>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", textAlign: "center", gap: "3px" }}>
+                    {calendarDates.map((date, i) => (
+                      <div key={date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                        <div
+                          style={{
+                            width: "19px",
+                            height: "19px",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "10px",
+                            fontWeight: i === todayIndex ? 700 : 500,
+                            color: i === todayIndex ? COLOR.primary : COLOR.text,
+                            backgroundColor: i === todayIndex ? COLOR.primarySoft : "transparent",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {date}
+                        </div>
+                        {dotDays.includes(i) && (
+                          <div style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: COLOR.primary }} />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -859,7 +1227,7 @@ export default function DashboardPage() {
               {/* ── Calendar ── */}
               <div
                 style={{
-                  display: "grid",
+                  display: "none",
                   gridTemplateColumns: "340px 1fr",
                   gap: "16px",
                   marginBottom: "24px",
@@ -923,27 +1291,28 @@ export default function DashboardPage() {
               </div>
 
               {/* ── Recent Tasks Table ── */}
-              <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0", padding: "20px", marginBottom: "32px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 700, color: "#111827" }}>Recent Tasks</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ ...CARD_STYLE, width: "100%", padding: 0, marginBottom: "32px", overflow: "hidden" }}>
+                <div style={{ height: "78px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 30px" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Recent Tasks</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     {/* Search in table */}
                     <div style={{ position: "relative" }}>
-                      <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex" }}>
+                      <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: COLOR.muted, display: "flex" }}>
                         <SearchIcon />
                       </span>
                       <input
                         type="text"
                         placeholder="Search task"
                         style={{
-                          width: "180px",
-                          height: "32px",
-                          borderRadius: "6px",
-                          border: "1px solid #e5e7eb",
-                          paddingLeft: "32px",
-                          paddingRight: "10px",
+                          width: "255px",
+                          height: "28px",
+                          borderRadius: "7px",
+                          border: "none",
+                          paddingLeft: "40px",
+                          paddingRight: "14px",
                           fontSize: "12px",
-                          color: "#111827",
+                          color: COLOR.text,
+                          backgroundColor: "#F1F1F1",
                           fontFamily: "inherit",
                           outline: "none",
                         }}
@@ -954,13 +1323,17 @@ export default function DashboardPage() {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "4px",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        border: "1px solid #e5e7eb",
-                        background: "#fff",
+                        justifyContent: "center",
+                        gap: "7px",
+                        width: "78px",
+                        height: "32px",
+                        padding: 0,
+                        borderRadius: "7px",
+                        border: `1px solid ${COLOR.border}`,
+                        background: COLOR.surface,
                         fontSize: "12px",
-                        color: "#6b7280",
+                        fontWeight: 600,
+                        color: COLOR.text,
                         cursor: "pointer",
                         fontFamily: "inherit",
                       }}
@@ -971,20 +1344,28 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Table */}
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                  <colgroup>
+                    <col style={{ width: "33%" }} />
+                    <col style={{ width: "16%" }} />
+                    <col style={{ width: "17%" }} />
+                    <col style={{ width: "20%" }} />
+                    <col style={{ width: "14%" }} />
+                  </colgroup>
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <tr style={{ height: "52px", backgroundColor: COLOR.panel, borderTop: `1px solid ${COLOR.border}`, borderBottom: `1px solid ${COLOR.border}` }}>
                       {["TASK ↕", "TASK LEVEL ↕", "SUBTASK ↕", "DUE DATE ↕", "VIEW DETAIL ↕"].map((h) => (
                         <th
                           key={h}
                           style={{
                             fontSize: "11px",
-                            fontWeight: 600,
-                            color: "#9ca3af",
-                            textAlign: "left",
-                            padding: "10px 12px",
+                            fontWeight: 700,
+                            color: COLOR.mutedDark,
+                            textAlign: "center",
+                            padding: "0 16px",
                             letterSpacing: "0.02em",
                             whiteSpace: "nowrap",
+                            verticalAlign: "middle",
                           }}
                         >
                           {h}
@@ -993,46 +1374,58 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentTasks.map((task) => (
-                      <tr key={task.title} style={{ borderBottom: "1px solid #f9fafb" }}>
-                        <td style={{ padding: "14px 12px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    {recentTaskItems.map((task) => (
+                      <tr key={task.id ?? task.title} style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
+                        <td style={{ padding: "0 16px 0 clamp(58px, 4.5vw, 80px)", verticalAlign: "middle" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "46px", minWidth: 0 }}>
                           <input
                             type="checkbox"
-                            defaultChecked={task.done}
+                            checked={!!task.done}
+                            disabled={isActionLoading}
+                            onChange={(e) => {
+                              void handleToggleTaskStatus(task, e.target.checked);
+                            }}
                             style={{
                               width: "16px",
                               height: "16px",
-                              accentColor: "#16a34a",
+                              accentColor: COLOR.primary,
                               borderRadius: "4px",
                               cursor: "pointer",
                               flexShrink: 0,
                             }}
                           />
-                          <span style={{ fontSize: "13px", fontWeight: 500, color: "#111827" }}>{task.title}</span>
+                          <span style={{ fontSize: "13px", fontWeight: 700, color: COLOR.text, lineHeight: 1.2, overflowWrap: "break-word" }}>{task.title}</span>
+                          </div>
                         </td>
-                        <td style={{ padding: "14px 12px" }}>
+                        <td style={{ padding: "0 16px", verticalAlign: "middle", textAlign: "center" }}>
                           <PriorityBadge level={task.level} />
                         </td>
-                        <td style={{ padding: "14px 12px", fontSize: "13px", color: "#6b7280" }}>
+                        <td style={{ padding: "0 16px", fontSize: "13px", color: COLOR.text, verticalAlign: "middle", textAlign: "center" }}>
                           {task.subtask}
                         </td>
-                        <td style={{ padding: "14px 12px", fontSize: "13px", color: "#6b7280" }}>
+                        <td style={{ padding: "0 16px", fontSize: "13px", color: COLOR.text, fontWeight: 700, verticalAlign: "middle", textAlign: "center" }}>
                           {task.date}
                         </td>
-                        <td style={{ padding: "14px 12px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <button style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}>
+                        <td style={{ padding: "0 16px", verticalAlign: "middle" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "34px" }}>
+                            <button style={{ ...buttonReset, color: COLOR.text, display: "flex" }}>
                               <MoreDotsIcon />
                             </button>
                             <button
+                              disabled={isActionLoading}
+                              onClick={() => {
+                                void handleStartFocus(task.id);
+                              }}
                               style={{
-                                padding: "6px 14px",
-                                borderRadius: "6px",
-                                border: "1px solid #e5e7eb",
-                                backgroundColor: "#ffffff",
-                                fontSize: "12px",
-                                fontWeight: 500,
-                                color: "#111827",
+                                width: "91px",
+                                height: "30px",
+                                padding: 0,
+                                borderRadius: "7px",
+                                border: `1px solid ${COLOR.border}`,
+                                backgroundColor: COLOR.surface,
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                color: COLOR.text,
                                 cursor: "pointer",
                                 fontFamily: "inherit",
                                 whiteSpace: "nowrap",
@@ -1053,55 +1446,56 @@ export default function DashboardPage() {
           {/* ── Template / Task View ── */}
           {(activeMenu === "template" || activeMenu === "task") && templateView === "list" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-                {templatesList
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "clamp(28px, 3vw, 44px)", alignItems: "start" }}>
+                {cardItems
                   .filter((item) => item.type.includes(templateFilter))
                   .map((item) => (
                     <div key={item.id} style={{
-                      flex: "1 1 300px",
-                      maxWidth: "400px",
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      border: "1px solid #f0f0f0",
+                      width: "100%",
+                      minHeight: "258px",
+                      backgroundColor: COLOR.surface,
+                      borderRadius: "7px",
+                      border: `1px solid ${COLOR.border}`,
                       padding: "24px",
+                      boxSizing: "border-box",
                       display: "flex",
                       flexDirection: "column"
                     }}>
                       {/* Icon & Badge */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
                         <div style={{
-                          width: "44px", height: "44px", borderRadius: "8px", backgroundColor: "#e0e7ff",
+                          width: "44px", height: "44px", borderRadius: "7px", backgroundColor: "#E5DEFF",
                           display: "flex", alignItems: "center", justifyContent: "center"
                         }}>
                           <CompassIcon />
                         </div>
                         <span style={{
-                          display: "inline-block", fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em",
-                          color: "#4b5563", backgroundColor: "#f3f4f6", borderRadius: "999px", padding: "4px 12px",
+                          display: "inline-block", fontSize: "11px", fontWeight: 700,
+                          color: COLOR.mutedDark, backgroundColor: "#F1F1F1", borderRadius: "999px", padding: "4px 13px",
                         }}>
                           {item.level}
                         </span>
                       </div>
 
                       {/* Title & Desc */}
-                      <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#111827", marginBottom: "8px", marginTop: 0 }}>
+                      <h3 style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, marginBottom: "10px", marginTop: 0, lineHeight: 1.25 }}>
                         {item.title}
                       </h3>
-                      <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.6, marginBottom: "24px" }}>
+                      <p style={{ fontSize: "14px", color: "#4B4B4B", lineHeight: 1.45, marginBottom: "22px" }}>
                         {item.desc}
                       </p>
 
                       {/* Tags */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
                         <span style={{
-                          display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4b5563",
-                          backgroundColor: "#f3f4f6", padding: "6px 10px", borderRadius: "6px", fontWeight: 500
+                          display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: COLOR.text,
+                          backgroundColor: "#F1F1F1", padding: "6px 10px", borderRadius: "5px", fontWeight: 500
                         }}>
                           <SubtaskIcon /> {item.subtasks} Subtasks
                         </span>
                         <span style={{
-                          display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4b5563",
-                          backgroundColor: "#f3f4f6", padding: "6px 10px", borderRadius: "6px", fontWeight: 500
+                          display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: COLOR.text,
+                          backgroundColor: "#F1F1F1", padding: "6px 10px", borderRadius: "5px", fontWeight: 500
                         }}>
                           <CalendarSmIcon /> No due date
                         </span>
@@ -1111,21 +1505,27 @@ export default function DashboardPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "auto" }}>
                         <button
                           onClick={() => {
-                            setSelectedTemplateId(item.id);
-                            setTemplateView("detail");
+                            void handleUseCard(item);
                           }}
                           style={{
-                            flex: 1, height: "40px", borderRadius: "8px", backgroundColor: "#16a34a", color: "#ffffff",
+                            flex: 1, height: "40px", borderRadius: "7px", backgroundColor: COLOR.primary, color: "#ffffff",
                             fontSize: "13px", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "inherit",
                             transition: "background-color 0.15s"
                           }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#15803d"; }}
-                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#16a34a"; }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLOR.primaryHover; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLOR.primary; }}
                         >
-                          Use Template
+                          {activeMenu === "task" ? "Mulai Fokus" : "Use Template"}
                         </button>
-                        <button style={{
-                          width: "40px", height: "40px", borderRadius: "8px", border: "1px solid #e5e7eb", backgroundColor: "#ffffff",
+                        <button
+                          onClick={() => {
+                            if (activeMenu === "template") {
+                              setSelectedTemplateId(item.id);
+                              setTemplateView("detail");
+                            }
+                          }}
+                          style={{
+                          width: "40px", height: "40px", borderRadius: "7px", border: `1px solid ${COLOR.border}`, backgroundColor: COLOR.surface,
                           display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "border-color 0.15s"
                         }}>
                           <EyeOutlineIcon />
@@ -1136,7 +1536,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Pagination */}
-              <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "16px" }}>
+              <div style={{ display: "none", justifyContent: "center", gap: "8px", marginTop: "16px" }}>
                 {[1, 2, 3].map((page) => (
                   <button key={page} style={{
                     width: "28px", height: "28px", borderRadius: "4px",
@@ -1152,6 +1552,7 @@ export default function DashboardPage() {
 
               {/* Tips Banner */}
               <div style={{
+                display: "none",
                 backgroundColor: "#dcfce7", color: "#166534", padding: "16px 24px",
                 borderRadius: "8px", fontSize: "13px", fontWeight: 600,
                 textAlign: "center", marginTop: "16px"
@@ -1162,7 +1563,7 @@ export default function DashboardPage() {
           )}
 
           {/* ── Detail Template View ── */}
-          {activeMenu === "template" && templateView === "detail" && selectedTemplateId && (
+          {activeMenu === "template" && templateView === "detail" && selectedCard && (
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <button
                 onClick={() => {
@@ -1206,14 +1607,14 @@ export default function DashboardPage() {
 
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: 0 }}>Proyek Kelompok</h2>
-                          <span style={{ fontSize: "10px", fontWeight: 700, color: "#6b7280", backgroundColor: "#f3f4f6", padding: "4px 10px", borderRadius: "999px", letterSpacing: "0.04em" }}>MIDLE</span>
+                          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#111827", margin: 0 }}>{selectedCard.title}</h2>
+                          <span style={{ fontSize: "10px", fontWeight: 700, color: "#6b7280", backgroundColor: "#f3f4f6", padding: "4px 10px", borderRadius: "999px", letterSpacing: "0.04em" }}>{selectedCard.level}</span>
                           <span style={{ fontSize: "10px", fontWeight: 700, color: "#4f46e5", backgroundColor: "#e0e7ff", padding: "4px 10px", borderRadius: "999px", letterSpacing: "0.04em" }}>WORK</span>
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
                           <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4b5563", backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: "6px", fontWeight: 500 }}>
-                            <SubtaskIcon /> 6 Subtasks
+                            <SubtaskIcon /> {selectedCard.subtasks} Subtasks
                           </span>
                           <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4b5563", backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: "6px", fontWeight: 500 }}>
                             <CalendarSmIcon /> No due date
@@ -1221,7 +1622,7 @@ export default function DashboardPage() {
                         </div>
 
                         <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.6, margin: 0, maxWidth: "340px" }}>
-                          A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.
+                          {selectedCard.desc}
                         </p>
                       </div>
                     </div>
@@ -1232,7 +1633,7 @@ export default function DashboardPage() {
                     <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#111827", margin: "0 0 24px" }}>Preview Daftar Task</h3>
 
                     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                      {["Diskusi & Pembagian Tugas", "Pengumpulan Data", "Analisis Data", "Penyusunan Laporan", "Revisi & Finalisasi", "Presentasi Hasil"].map((task, idx) => (
+                      {(selectedCard.previewItems?.map((item) => item.title) ?? ["Belum ada preview task"]).map((task, idx) => (
                         <div key={idx} style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                           <div style={{
                             width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#16a34a",
@@ -1274,7 +1675,7 @@ export default function DashboardPage() {
                         <UsersUpIcon />
                         <span style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280" }}>Used</span>
                       </div>
-                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>1.2k times</span>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>{selectedCard.subtasks} tasks</span>
                     </div>
 
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1282,12 +1683,16 @@ export default function DashboardPage() {
                         <DownloadSquareIcon />
                         <span style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280" }}>Last updated</span>
                       </div>
-                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>12 Mei 2025</span>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>Backend API</span>
                     </div>
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <button style={{
+                    <button
+                      onClick={() => {
+                        void handleUseCard(selectedCard);
+                      }}
+                      style={{
                       width: "100%", height: "40px", borderRadius: "8px", backgroundColor: "#16a34a",
                       color: "#ffffff", fontSize: "13px", fontWeight: 600, border: "none",
                       cursor: "pointer", fontFamily: "inherit", transition: "background-color 0.15s"
@@ -1297,7 +1702,9 @@ export default function DashboardPage() {
                     >
                       Use Template
                     </button>
-                    <button style={{
+                    <button
+                      onClick={() => setNotice("Fitur private custom template perlu endpoint backend tambahan.")}
+                      style={{
                       width: "100%", height: "40px", borderRadius: "8px", backgroundColor: "#ffffff",
                       color: "#111827", fontSize: "13px", fontWeight: 600, border: "1px solid #e5e7eb",
                       cursor: "pointer", fontFamily: "inherit", transition: "background-color 0.15s"
@@ -1487,11 +1894,11 @@ export default function DashboardPage() {
                     </button>
                     <button
                       onClick={() => {
-                        const newTask = {
+                        const newTask: ViewCard = {
                           id: templatesList.length + 1,
                           title: newTemplate.title || "Untitled",
                           desc: newTemplate.desc || "No description",
-                          level: newTemplate.priority as any,
+                          level: newTemplate.priority,
                           subtasks: 6,
                           type: newTemplate.label === "PRIVATE" ? ["All", "Private"] : ["All", "Public"]
                         };

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { resetPassword } from "../lib/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -88,8 +88,6 @@ const inputWithIconStyle: React.CSSProperties = {
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -122,14 +120,27 @@ export default function ResetPasswordPage() {
       setError("Password minimal 6 karakter.");
       return;
     }
+    const resetToken = new URLSearchParams(window.location.search).get("token");
+
+    if (!resetToken) {
+      setError("Link reset password tidak valid atau token tidak ditemukan.");
+      return;
+    }
 
     setIsLoading(true);
 
-    // Simulate an API call delay for reset password
-    await new Promise((res) => setTimeout(res, 1200));
-
-    setIsLoading(false);
-    setIsSuccess(true);
+    try {
+      await resetPassword(resetToken, password);
+      setIsSuccess(true);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Tidak dapat menyimpan password baru.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

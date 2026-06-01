@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { loginUser, saveAuthSession } from "./lib/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -80,32 +81,20 @@ export default function SignInPage() {
     setError(null);
     setIsLoading(true);
 
-    // Temporary bypass for frontend testing
-    if (email === "admin123@gmail.com" && password === "123admin321") {
-      router.push("/dashboard");
-      return;
-    }
-
     try {
-      const res = await fetch("http://localhost:5000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "Login failed. Please check your credentials.");
-        return;
+      const data = await loginUser(email, password);
+
+      if (data.data?.token) {
+        saveAuthSession(data.data, rememberMe);
       }
-      if (rememberMe && data.data?.token) {
-        localStorage.setItem("bentodo_token", data.data.token);
-      } else if (data.data?.token) {
-        sessionStorage.setItem("bentodo_token", data.data.token);
-      }
+
       router.push("/dashboard");
-    } catch {
-      setError("Unable to connect to server. Please try again.");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to connect to server. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
