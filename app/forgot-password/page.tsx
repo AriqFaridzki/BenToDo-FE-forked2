@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { forgotPassword } from "../lib/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -81,12 +82,18 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
 
-    // Simulate a short delay then show success
-    // (replace with real API call when backend supports it)
-    await new Promise((res) => setTimeout(res, 1200));
-
-    setIsLoading(false);
-    setIsSuccess(true);
+    try {
+      await forgotPassword(email.trim());
+      setIsSuccess(true);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Tidak dapat mengirim link reset password.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -24,8 +24,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${poppins.variable} h-full`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
+      <body
+        className="min-h-full flex flex-col"
+        style={{ fontFamily: "var(--font-poppins), sans-serif" }}
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

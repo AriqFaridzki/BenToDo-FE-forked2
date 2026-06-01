@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { registerUser, saveAuthSession } from "../lib/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -121,28 +122,19 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          display_name: displayName,
-          email,
-          password,
-        }),
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "Registrasi gagal. Silakan coba lagi.");
-        return;
-      }
-      // Store token and go to dashboard
+      const data = await registerUser(displayName, email, password);
+
       if (data.data?.token) {
-        sessionStorage.setItem("bentodo_token", data.data.token);
+        saveAuthSession(data.data);
       }
+
       router.push("/dashboard");
-    } catch {
-      setError("Tidak dapat terhubung ke server. Silakan coba lagi.");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Tidak dapat terhubung ke server. Silakan coba lagi.",
+      );
     } finally {
       setIsLoading(false);
     }
