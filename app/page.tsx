@@ -1440,7 +1440,7 @@ export default function LandingPage() {
               <div className="section-heading section-heading--center reveal">
                 <div className="eyebrow">Cara pakai</div>
                 <h2>
-                  Mulai dari kosong sampai <span>siap fokus</span>.
+                  Mulai dari kosong sampai <span>siap fokus</span>
                 </h2>
                 <p>
                   Alurnya dibuat pendek supaya pengguna baru bisa mencoba aplikasi tanpa membaca
@@ -1466,7 +1466,7 @@ export default function LandingPage() {
                 <div className="eyebrow">Fitur inti</div>
                 <div className="section-heading" style={{ marginBottom: 0 }}>
                   <h2>
-                    Dibuat untuk ritme belajar yang <span>lebih manusiawi</span>.
+                    Dibuat untuk ritme belajar yang <span>lebih manusiawi</span>
                   </h2>
                   <p>
                     Fokusnya bukan menambah banyak panel, tapi membuat tugas besar terasa bisa
@@ -1498,7 +1498,7 @@ export default function LandingPage() {
               <div className="section-heading reveal">
                 <div className="eyebrow">Template</div>
                 <h2>
-                  Template tugas yang sering muncul di <span>perkuliahan</span>.
+                  Template tugas yang sering muncul di <span>perkuliahan</span>
                 </h2>
                 <p>
                   Bukan kumpulan card dekoratif, melainkan daftar awal yang bisa dipakai untuk
@@ -1568,7 +1568,7 @@ export default function LandingPage() {
               <div className="section-heading section-heading--center reveal">
                 <div className="eyebrow">FAQ</div>
                 <h2>
-                  Pertanyaan yang <span>sering ditanyakan</span>.
+                  Pertanyaan yang <span>sering ditanyakan</span>
                 </h2>
               </div>
 
