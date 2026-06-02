@@ -402,18 +402,6 @@ function ProductivityChart() {
 
 // ─── Sample Data ──────────────────────────────────────────────────────────────
 
-const priorityTasks = [
-  { title: "Draft Client Proposal", level: "HIGH" as const, subtask: "0/5", date: "Oct 2, 2026" },
-  { title: "Finalize UI Screens", level: "MEDIUM" as const, subtask: "7/10", date: "Sep 30, 2026" },
-  { title: "Research for Mobile App", level: "LOW" as const, subtask: "4/4", date: "Sep 28, 2026" },
-];
-
-const recentTasks = [
-  { title: "Skripsi", level: "HIGH" as const, subtask: "0/5", date: "Oct 2, 2026", done: false },
-  { title: "Metopen Bab 1", level: "MEDIUM" as const, subtask: "7/10", date: "Sep 30, 2026", done: true },
-  { title: "SRS Mobile app Task", level: "LOW" as const, subtask: "4/4", date: "Sep 28, 2026", done: false },
-];
-
 // ─── Calendar Data ────────────────────────────────────────────────────────────
 
 const calendarDays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -622,10 +610,13 @@ export default function DashboardPage() {
       .slice(0, 3)
       .map(mapTaskToViewTask);
 
-    return activeTasks.length > 0 ? activeTasks : priorityTasks;
+    return activeTasks;
   }, [apiTasks]);
 
-  const recentTaskItems: ViewTask[] = filteredTasks.length > 0 ? filteredTasks : recentTasks;
+  const recentTaskItems: ViewTask[] = filteredTasks;
+  const emptyRecentTaskMessage = searchTask.trim()
+    ? "Task tidak ditemukan"
+    : "Belum ada task";
 
   const taskCards = useMemo(() => {
     return apiTasks.map(mapTaskToCard);
@@ -1120,9 +1111,25 @@ export default function DashboardPage() {
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                    {priorityTaskItems.map((task) => (
+                    {priorityTaskItems.length === 0 ? (
                       <div
-                        key={task.title}
+                        style={{
+                          backgroundColor: "#F1F1F1",
+                          borderRadius: "7px",
+                          padding: "18px clamp(16px, 1.8vw, 24px)",
+                          minHeight: "80px",
+                          display: "flex",
+                          alignItems: "center",
+                          color: COLOR.mutedDark,
+                          fontSize: "13px",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Belum ada priority task
+                      </div>
+                    ) : priorityTaskItems.map((task) => (
+                      <div
+                        key={task.id ?? task.title}
                         style={{
                           backgroundColor: "#F1F1F1",
                           borderRadius: "7px",
@@ -1303,6 +1310,8 @@ export default function DashboardPage() {
                       <input
                         type="text"
                         placeholder="Search task"
+                        value={searchTask}
+                        onChange={(e) => setSearchTask(e.target.value)}
                         style={{
                           width: "255px",
                           height: "28px",
@@ -1374,7 +1383,23 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentTaskItems.map((task) => (
+                    {recentTaskItems.length === 0 ? (
+                      <tr style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
+                        <td
+                          colSpan={5}
+                          style={{
+                            padding: "0 16px",
+                            textAlign: "center",
+                            verticalAlign: "middle",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: COLOR.mutedDark,
+                          }}
+                        >
+                          {emptyRecentTaskMessage}
+                        </td>
+                      </tr>
+                    ) : recentTaskItems.map((task) => (
                       <tr key={task.id ?? task.title} style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
                         <td style={{ padding: "0 16px 0 clamp(58px, 4.5vw, 80px)", verticalAlign: "middle" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "46px", minWidth: 0 }}>
