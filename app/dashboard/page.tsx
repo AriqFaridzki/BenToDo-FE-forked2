@@ -530,7 +530,7 @@ export default function DashboardPage() {
 
   const loadDashboardData = useCallback(async (silent = false) => {
     if (!getAuthToken()) {
-      router.replace("/");
+      router.replace("/login");
       return;
     }
 
@@ -631,7 +631,7 @@ export default function DashboardPage() {
 
   const handleSignOut = () => {
     clearAuthSession();
-    router.push("/");
+    router.push("/login");
   };
 
   const handleToggleTaskStatus = async (task: ViewTask, checked: boolean) => {
@@ -655,7 +655,7 @@ export default function DashboardPage() {
     try {
       await startFocusSession(taskId);
       setNotice("Sesi fokus berhasil dimulai.");
-      await loadDashboardData(true);
+      router.push("/focus");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Gagal memulai fokus.");
     } finally {

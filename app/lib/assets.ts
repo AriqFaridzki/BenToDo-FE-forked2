@@ -7,3 +7,4 @@ export const publicAsset = (path: string) => {
 };
 
 export const LOGO_SRC = publicAsset("/Logo BenTodo.png");
+export const PRODUCTIVITY_BG_SRC = publicAsset("/productivity-bg.png");
