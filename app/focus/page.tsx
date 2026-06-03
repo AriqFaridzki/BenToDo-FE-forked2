@@ -61,9 +61,9 @@ export default function FocusTimerPage() {
         const [sessionRes, tasksRes, energyRes] = await Promise.all([
           guest
             ? Promise.resolve({
-                active_session: null,
-                auto_stopped_session: null,
-              })
+              active_session: null,
+              auto_stopped_session: null,
+            })
             : getActiveFocusSession(),
           getTasks(1, 10),
           guest ? Promise.resolve({ data: GUEST_ENERGY_SUMMARY }) : getEnergySummary()
@@ -73,13 +73,13 @@ export default function FocusTimerPage() {
           const s = sessionRes.active_session;
           setSession(s);
           setMode("focus");
-          
+
           const startedAt = new Date(s.started_at).getTime();
           const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
           const limitSeconds = s.session_limit_minutes * 60;
           let remaining = limitSeconds - elapsedSeconds;
           if (remaining < 0) remaining = 0;
-          
+
           setTimeLeft(remaining);
           setIsActive(true);
         } else {
@@ -89,7 +89,7 @@ export default function FocusTimerPage() {
         if (tasksRes.data) {
           setTasks(tasksRes.data.filter(t => t.status !== "done"));
         }
-        
+
         if (energyRes.data) {
           setEnergyData(energyRes.data);
         }
@@ -119,7 +119,7 @@ export default function FocusTimerPage() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, timeLeft]);
 
   // Click outside popup to close
@@ -130,7 +130,7 @@ export default function FocusTimerPage() {
         setActivePopup(null);
       }
     }
-    
+
     if (activePopup) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -170,7 +170,7 @@ export default function FocusTimerPage() {
 
   const switchMode = async () => {
     setIsActive(false);
-    
+
     if (mode === "focus" && session) {
       try {
         await stopFocusSession(session.id, "escaped");
@@ -208,7 +208,7 @@ export default function FocusTimerPage() {
     let totalSeconds = 0;
     const h = parseInt(customHours) || 0;
     const m = parseInt(customMinutes) || 0;
-    
+
     if (h === 0 && m === 0) return;
 
     totalSeconds = (h * 3600) + (m * 60);
@@ -239,16 +239,16 @@ export default function FocusTimerPage() {
     );
   }
 
-  const dotColor = "#0F8C2A"; 
-  const buttonColor = "#0F8C2A"; 
+  const dotColor = "#0F8C2A";
+  const buttonColor = "#0F8C2A";
   const textColor = "#E8F5E9";
 
-  const energyPercentage = energyData 
+  const energyPercentage = energyData
     ? Math.min(100, Math.round((energyData.current_energy / energyData.max_energy) * 100))
     : 0;
 
   return (
-    <main 
+    <main
       className="min-h-screen text-white font-sans overflow-hidden flex flex-col relative"
       style={{
         backgroundColor: "#161816",
@@ -263,8 +263,8 @@ export default function FocusTimerPage() {
     >
       {/* Header */}
       <header className="flex justify-between items-center p-8 z-10 relative">
-        <Link 
-          href="/dashboard" 
+        <Link
+          href="/dashboard"
           className="flex items-center gap-2 text-white/80 hover:text-white transition"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -282,8 +282,8 @@ export default function FocusTimerPage() {
       <div className="flex-1 flex flex-col items-center justify-center z-10 -mt-16">
         {/* Mode Pill */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-[#1e231e]/50 backdrop-blur-sm mb-6">
-          <div 
-            className="w-2.5 h-2.5 rounded-full" 
+          <div
+            className="w-2.5 h-2.5 rounded-full"
             style={{ backgroundColor: dotColor, boxShadow: `0 0 8px ${dotColor}` }}
           ></div>
           <span className="text-[14px] text-white/90">
@@ -305,7 +305,7 @@ export default function FocusTimerPage() {
 
         {/* Controls */}
         <div className="flex items-center gap-6">
-          <button 
+          <button
             onClick={togglePlayPause}
             className="w-[64px] h-[64px] rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: buttonColor }}
@@ -322,7 +322,7 @@ export default function FocusTimerPage() {
             )}
           </button>
 
-          <button 
+          <button
             onClick={resetTimer}
             className="w-[54px] h-[54px] rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition"
           >
@@ -332,7 +332,7 @@ export default function FocusTimerPage() {
             </svg>
           </button>
 
-          <button 
+          <button
             onClick={switchMode}
             className="px-8 py-[14px] rounded-full bg-[#2a2e2a] hover:bg-[#343a34] text-white/90 font-semibold tracking-wide transition border border-white/5"
           >
@@ -356,40 +356,40 @@ export default function FocusTimerPage() {
 
             <div className="flex w-full gap-4 mb-4">
               <div className="flex-1 relative">
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   value={customMinutes}
                   onChange={(e) => setCustomMinutes(e.target.value)}
-                  className="w-full bg-[#2B2B2B] border border-white/20 rounded-xl px-4 py-4 text-center text-white focus:outline-none focus:border-[#0F8C2A] transition" 
+                  className="w-full bg-[#2B2B2B] border border-white/20 rounded-xl px-4 py-4 text-center text-white focus:outline-none focus:border-[#0F8C2A] transition"
                   placeholder="Minutes"
                 />
               </div>
               <div className="flex-1 relative">
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   value={customHours}
                   onChange={(e) => setCustomHours(e.target.value)}
-                  className="w-full bg-[#2B2B2B] border border-white/20 rounded-xl px-4 py-4 text-center text-white focus:outline-none focus:border-[#0F8C2A] transition" 
+                  className="w-full bg-[#2B2B2B] border border-white/20 rounded-xl px-4 py-4 text-center text-white focus:outline-none focus:border-[#0F8C2A] transition"
                   placeholder="Hours"
                 />
               </div>
             </div>
             <div className="w-full mb-8">
-              <input 
-                type="text" 
-                className="w-full bg-[#2B2B2B] border border-white/20 rounded-xl px-4 py-4 text-white placeholder:text-white/40 focus:outline-none focus:border-[#0F8C2A] transition" 
+              <input
+                type="text"
+                className="w-full bg-[#2B2B2B] border border-white/20 rounded-xl px-4 py-4 text-white placeholder:text-white/40 focus:outline-none focus:border-[#0F8C2A] transition"
                 placeholder="Custom Your Timer"
               />
             </div>
 
             <div className="flex w-full gap-4">
-              <button 
+              <button
                 onClick={() => setActivePopup(null)}
                 className="flex-1 py-3.5 rounded-xl bg-[#A10000] hover:bg-[#800000] text-white font-medium transition"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={applyCustomTimer}
                 className="flex-1 py-3.5 rounded-xl bg-[#0F8C2A] hover:bg-[#0c7322] text-white font-medium transition"
               >
@@ -415,11 +415,11 @@ export default function FocusTimerPage() {
               </svg>
               <h3 className="text-white text-[16px] font-medium">Task</h3>
             </div>
-            
+
             <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {tasks.length > 0 ? tasks.map((task) => (
                 <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#2B2B2B] rounded-xl hover:bg-[#333333] transition cursor-pointer">
-                  <button 
+                  <button
                     onClick={() => handleToggleTaskStatus(task.id, task.status)}
                     className="w-5 h-5 rounded border border-white/40 flex-shrink-0 hover:border-[#0F8C2A] transition"
                   ></button>
@@ -446,11 +446,11 @@ export default function FocusTimerPage() {
               </div>
               <h3 className="text-white text-[18px] font-medium">Energy</h3>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="flex-1 h-4 bg-black rounded-full overflow-hidden border border-black/20">
-                <div 
-                  className="h-full bg-[#0F8C2A] rounded-full transition-all duration-500 ease-out" 
+                <div
+                  className="h-full bg-[#0F8C2A] rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${energyPercentage}%` }}
                 ></div>
               </div>
@@ -464,7 +464,7 @@ export default function FocusTimerPage() {
       <footer className="absolute bottom-8 left-8 right-8 flex justify-between items-end z-30">
         <div className="flex items-center gap-2 p-1.5 rounded-xl border border-white/10 backdrop-blur-md" style={{ backgroundColor: "rgba(30, 35, 30, 0.6)" }}>
           {/* Task Icon (Clipboard) */}
-          <button 
+          <button
             onClick={(e) => togglePopup("task", e)}
             className={`w-[46px] h-[46px] flex items-center justify-center rounded-lg transition ${activePopup === "task" ? "bg-white/20" : "hover:bg-white/10"}`}
           >
@@ -476,9 +476,9 @@ export default function FocusTimerPage() {
               <polyline points="10 9 9 9 8 9" />
             </svg>
           </button>
-          
+
           {/* Timer Settings Icon (Replaced Music with Stopwatch) */}
-          <button 
+          <button
             onClick={(e) => togglePopup("timer", e)}
             className={`w-[46px] h-[46px] flex items-center justify-center rounded-lg transition ${activePopup === "timer" ? "bg-white/20" : "hover:bg-white/10"}`}
           >
@@ -487,9 +487,9 @@ export default function FocusTimerPage() {
               <polyline points="12 6 12 12 16 14" />
             </svg>
           </button>
-          
+
           {/* Energy Icon (Lightning) */}
-          <button 
+          <button
             onClick={(e) => togglePopup("energy", e)}
             className={`w-[46px] h-[46px] flex items-center justify-center rounded-lg transition ${activePopup === "energy" ? "bg-white/20" : "hover:bg-white/10"}`}
           >
@@ -500,7 +500,7 @@ export default function FocusTimerPage() {
         </div>
 
         {/* Fullscreen Icon */}
-        <button 
+        <button
           className="w-[46px] h-[46px] flex items-center justify-center rounded-xl border border-white/10 backdrop-blur-md hover:bg-white/10 transition"
           style={{ backgroundColor: "rgba(30, 35, 30, 0.6)" }}
           onClick={() => {
