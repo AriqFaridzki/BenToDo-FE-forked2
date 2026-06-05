@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
+import { // API Calling
   applyTemplate,
   clearAuthSession,
   getDashboardZen,
@@ -16,7 +16,8 @@ import {
   updateTask,
   createTask,
 } from "../lib/api";
-import { LOGO_SRC } from "../lib/assets";
+
+
 
 import { // import icons
   DashboardIcon, 
@@ -28,69 +29,44 @@ import { // import icons
   PlayIcon, 
   CheckSquareIcon, 
   ClockAlertIcon, 
-  AlertTriangleIcon, BatteryIcon, CalendarSmIcon, SubtaskIcon, FilterIcon, ChevronLeftIcon, ChevronRightIcon, MoreDotsIcon, TrendUpIcon, TrendDownIcon, CompassIcon, EyeOutlineIcon, UsersIcon, ShareIcon, WrenchIcon, MailIcon, UsersUpIcon, DownloadSquareIcon, ArrowLeftIcon, CalendarLineIcon, SuccessCheckIcon, CheckCircleSolidIcon, PlusCircleIcon} from "../components/icons";
+  AlertTriangleIcon, 
+  BatteryIcon, 
+  CalendarSmIcon, 
+  SubtaskIcon, 
+  FilterIcon, 
+  ChevronLeftIcon, 
+  ChevronRightIcon, 
+  MoreDotsIcon, 
+  TrendUpIcon, 
+  TrendDownIcon, 
+  CompassIcon, 
+  EyeOutlineIcon, 
+  UsersIcon, 
+  ShareIcon, 
+  WrenchIcon, 
+  MailIcon, 
+  UsersUpIcon, 
+  DownloadSquareIcon, 
+  ArrowLeftIcon, 
+  CalendarLineIcon, 
+  SuccessCheckIcon, 
+  CheckCircleSolidIcon, 
+  PlusCircleIcon} from "../components/ui/icons";
 
-import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE, buttonReset} from "../components/color"; //import color
+import { LOGO_SRC } from "../lib/assets"; // logo
+
+import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE_COLOR, buttonReset} from "../components/ui/color"; //import color
 import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 
+//badges
+import { TrendBadge, PriorityBadge } from "../components/ui/badge";
+import { getCalendarWeek } from "../lib/utils";
 
-
-// ─── Stat Card Badge ──────────────────────────────────────────────────────────
-
-function TrendBadge({ value, up }: { value: string; up: boolean }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "2px",
-        fontSize: "12px",
-        fontWeight: 700,
-        color: up ? COLOR.primary : "#D62839",
-        backgroundColor: up ? "#BDFCC8" : COLOR.dangerSoft,
-        borderRadius: "999px",
-        padding: "2px 8px",
-      }}
-    >
-      {up ? <TrendUpIcon /> : <TrendDownIcon />}
-      {value}
-    </span>
-  );
-}
-
-// ─── Priority Badge ───────────────────────────────────────────────────────────
-
-function PriorityBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
-  const map = {
-    HIGH: { bg: "#6D6D6D", text: "#fff" },
-    MEDIUM: { bg: "#7B7B7B", text: "#fff" },
-    LOW: { bg: "#8E8E8E", text: "#fff" },
-  };
-  const { bg, text } = map[level];
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        fontSize: "11px",
-        fontWeight: 700,
-        letterSpacing: "0.04em",
-        color: text,
-        backgroundColor: bg,
-        borderRadius: "999px",
-        padding: "3px 10px",
-        lineHeight: "16px",
-        flexShrink: 0,
-      }}
-    >
-      {level}
-    </span>
-  );
-}
 
 // ─── Mini Line Chart (SVG) ────────────────────────────────────────────────────
 // Data Labels: Week (Sun-Sat), Month (Week 1-4), Year (Jan-Dec)
 
-type ChartRange = "week" | "month" | "year";
+type ChartRange = "week" | "month" | "year"; // custom type for chart range
 
 const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
   week: {
@@ -229,21 +205,6 @@ function ProductivityChart({ range = "week" }: { range?: ChartRange }) {
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-function getCalendarWeek(referenceDate: Date) {
-  const day = referenceDate.getDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  const monday = new Date(referenceDate);
-  monday.setDate(referenceDate.getDate() + mondayOffset);
-
-  const dates: Date[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    dates.push(d);
-  }
-  return dates;
-}
-
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
@@ -252,7 +213,7 @@ function isSameDay(a: Date, b: Date) {
 
 const templatesData = [
   { id: 1, title: "Weekly Design Sprint", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "HIGH", subtasks: 2, type: ["All", "Public"] },
-  { id: 2, title: "Proyek Kelompok", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "MIDLE", subtasks: 4, type: ["All", "Private"] },
+  { id: 2, title: "Proyek Kelompok", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "MEDIUM", subtasks: 4, type: ["All", "Private"] },
   { id: 3, title: "Rencana Belajar Semester", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "LOW", subtasks: 3, type: ["All", "Public"] },
   { id: 4, title: "Menulis Skripsi", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "HIGH", subtasks: 4, type: ["All", "Private"] },
   { id: 5, title: "Persiapan Ujian", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "LOW", subtasks: 2, type: ["All"] },
@@ -939,7 +900,7 @@ export default function DashboardPage() {
                 }}
               >
                 {/* Task Completed */}
-                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Task Completed</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <CheckSquareIcon />
@@ -950,7 +911,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Upcoming Deadlines */}
-                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Upcoming Deadlines</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <ClockAlertIcon />
@@ -961,7 +922,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Overdue Task */}
-                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Overdue Task</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <AlertTriangleIcon />
@@ -972,7 +933,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Energy */}
-                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Energy</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <BatteryIcon />
@@ -1004,7 +965,7 @@ export default function DashboardPage() {
                 }}
               >
                 {/* Priority Task Card */}
-                <div style={{ ...CARD_STYLE, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
+                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
                     <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Priority Task</span>
                     <span onClick={() => setActiveMenu("task")} style={{ fontSize: "12px", color: COLOR.mutedDark, cursor: "pointer", lineHeight: 1 }}>View all</span>
@@ -1055,7 +1016,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Productivity Overview Chart */}
-                <div style={{ ...CARD_STYLE, padding: "24px clamp(18px, 2vw, 32px)", gridColumn: "2", gridRow: "1 / span 2", minHeight: "386px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+                <div style={{ ...CARD_STYLE_COLOR, padding: "24px clamp(18px, 2vw, 32px)", gridColumn: "2", gridRow: "1 / span 2", minHeight: "386px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
                     <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Productivity Overview</span>
                     <div style={{ position: "relative" }}>
@@ -1135,7 +1096,7 @@ export default function DashboardPage() {
                     .map((t) => new Date(t.deadline!));
 
                   return (
-                    <div style={{ ...CARD_STYLE, width: "100%", padding: "12px 14px", minHeight: "86px", boxSizing: "border-box", gridColumn: "1" }}>
+                    <div style={{ ...CARD_STYLE_COLOR, width: "100%", padding: "12px 14px", minHeight: "86px", boxSizing: "border-box", gridColumn: "1" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "9px" }}>
                         <span style={{ fontSize: "13px", fontWeight: 700, color: COLOR.text }}>Calendar</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
@@ -1222,7 +1183,7 @@ export default function DashboardPage() {
               </div>
 
               {/* ── Recent Tasks Table ── */}
-              <div id="recent-tasks-section" style={{ ...CARD_STYLE, width: "100%", padding: 0, marginBottom: "32px", overflow: "hidden" }}>
+              <div id="recent-tasks-section" style={{ ...CARD_STYLE_COLOR, width: "100%", padding: 0, marginBottom: "32px", overflow: "hidden" }}>
                 <div style={{ height: "78px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 30px" }}>
                   <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Recent Tasks</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

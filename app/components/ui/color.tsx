@@ -20,7 +20,7 @@ export const GUEST_ENERGY_SUMMARY = {
   is_critical_energy: false,
 };
 
-export const CARD_STYLE = {
+export const CARD_STYLE_COLOR = {
   backgroundColor: COLOR.surface,
   borderRadius: "8px",
   border: `1px solid ${COLOR.border}`,
