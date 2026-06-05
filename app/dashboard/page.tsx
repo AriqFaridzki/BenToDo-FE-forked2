@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { // API Calling
+
+// API AND FUNCTIONS CALL
+import {
   applyTemplate,
   clearAuthSession,
   getDashboardZen,
@@ -17,8 +19,9 @@ import { // API Calling
   createTask,
 } from "../lib/api";
 
+import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 
-
+//color and SVG assets
 import { // import icons
   DashboardIcon, 
   TaskIcon, 
@@ -53,15 +56,22 @@ import { // import icons
   CheckCircleSolidIcon, 
   PlusCircleIcon} from "../components/ui/icons";
 
-import { LOGO_SRC } from "../lib/assets"; // logo
-
 import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE_COLOR, buttonReset} from "../components/ui/color"; //import color
-import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
+import { LOGO_SRC } from "../lib/assets"; // logo
 
 //badges
 import { TrendBadge, PriorityBadge } from "../components/ui/badge";
-import { getCalendarWeek } from "../lib/utils";
 
+//helper or utils
+import { getCalendarWeek } from "../lib/utils";
+import { MONTH_NAMES, DAY_HEADERS } from "../lib/utils";
+import { isSameDay } from "../lib/utils";
+
+//Components
+import { ProductivityChart } from "../components/features/ProductivityCharts";
+
+//import Line Charts States
+import {chartRange, setChartRange, timeRange, setTimeRange, chartDropdownOpen, setChartDropdownOpen, calendarRef, setCalendarRef} from "../components/features/ProductivityCharts";
 
 // ─── Mini Line Chart (SVG) ────────────────────────────────────────────────────
 // Data Labels: Week (Sun-Sat), Month (Week 1-4), Year (Jan-Dec)
@@ -83,131 +93,10 @@ const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
   },
 };
 
-function ProductivityChart({ range = "week" }: { range?: ChartRange }) {
-  const { labels, data } = CHART_DATA[range];
-  const width = 520;
-  const height = 220;
-  const padX = 40;
-  const padY = 20;
-  const maxVal = Math.max(...data) + 2;
-  const chartW = width - padX * 2;
-  const chartH = height - padY * 2;
-
-  const totalValue = data.reduce((sum, v) => sum + v, 0);
-  const avgValue = data.length ? (totalValue / data.length).toFixed(1) : "0";
-
-  const currentWeekDates = getCalendarWeek(new Date()); // get current week's dates
-  const formattedLabels = range === "week"
-    ? currentWeekDates.map((date, i) => `${date.getDate()} · ${DAY_HEADERS[i]}`)
-    : labels;
-
-  const points = data.map((v, i) => {
-    const x = padX + (i / (data.length - 1)) * chartW;
-    const y = padY + chartH - (v / maxVal) * chartH;
-    return `${x},${y}`;
-  });
-  
-  const areaPoints = [
-    `${padX},${height - padY}`,
-    ...points,
-    `${width - padX},${height - padY}`,
-  ].join(" ");
-
-  const ySteps = 7;
-  const yLabels = Array.from({ length: ySteps }, (_, i) => Math.round((maxVal / (ySteps - 1)) * i));
-
-  const lineLength = points.reduce((acc, _, i, arr) => {
-    if (i === 0) return 0;
-    const [x1, y1] = arr[i - 1].split(",").map(Number);
-    const [x2, y2] = arr[i].split(",").map(Number);
-    return acc + Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-  }, 0);
-
-  return (
-    <div style={{ width: "100%" }}>
-      {/* Header Info */}
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        marginBottom: "16px",
-        padding: "0 4px" 
-      }}>
-        <span style={{ fontSize: "11px", color: COLOR.muted, fontWeight: 500 }}>
-          Tugas Selesai Dikejakan:
-        </span>
-        <div style={{ fontSize: "12px", color: COLOR.text, fontWeight: 500 }}>
-          <span>Total: <strong style={{ color: COLOR.primary }}>{totalValue} Jam</strong></span>
-          <span style={{ margin: "0 8px", color: "#E8E8E8" }}>|</span>
-          <span>Rata-rata: <strong style={{ color: COLOR.primary }}>{avgValue} Jam/hari</strong></span>
-        </div>
-      </div>
-
-      {/* SVG Chart - garisnya */}
-      <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height + 30}`} style={{ overflow: "visible" }}>
-        <style>{`
-          @keyframes drawLine { from { stroke-dashoffset: ${lineLength}; } to { stroke-dashoffset: 0; } }
-          @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes popIn { 0% { r: 0; } 60% { r: 4.5; } 100% { r: 3; } }
-        `}</style>
-        
-        {/* Y axis labels & grid */}
-        {yLabels.map((v, i) => {
-          const y = padY + chartH - (v / maxVal) * chartH;
-          return (
-            <g key={`y-${i}`} style={{ animation: `fadeIn 0.4s ease ${i * 0.05}s both` }}>
-              <text x={padX - 12} y={y + 4} textAnchor="end" fontSize="9" fill={COLOR.muted}>{v}</text>
-              <line x1={padX} y1={y} x2={width - padX} y2={y} stroke="#E8E8E8" strokeWidth="1" />
-            </g>
-          );
-        })}
-        
-        {/* X axis labels */}
-        {formattedLabels.map((d, i) => {
-          const x = padX + (i / (formattedLabels.length - 1)) * chartW;
-          return (
-            <text key={d} x={x} y={height + 16} textAnchor="middle" fontSize="8" fill={COLOR.text}
-              style={{ animation: `fadeIn 0.4s ease ${0.2 + i * 0.04}s both` }}>{d}</text>
-          );
-        })}
-        
-        <polygon points={areaPoints} fill="#EEFFF0" opacity="0.95" style={{ animation: `fadeIn 0.8s ease 0.3s both` }} />
-        
-        {/* Animated Line */}
-        <polyline
-          points={points.join(" ")}
-          fill="none"
-          stroke={COLOR.primary}
-          strokeWidth="2"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          strokeDasharray={lineLength}
-          strokeDashoffset="0"
-          style={{ animation: `drawLine 1.2s ease-out 0.3s both` }}
-        />
-        
-        {/* Animated Dots */}
-        {data.map((v, i) => {
-          const x = padX + (i / (data.length - 1)) * chartW;
-          const y = padY + chartH - (v / maxVal) * chartH;
-          return <circle key={i} cx={x} cy={y} r="3" fill={COLOR.primary}
-            style={{ animation: `popIn 0.4s ease ${0.5 + i * 0.1}s both` }} />;
-        })}
-      </svg>
-    </div>
-  );
-}
 
 // ─── Sample Data ──────────────────────────────────────────────────────────────
 
-// ─── Calendar Helpers ─────────────────────────────────────────────────────────
 
-const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
 
 // ─── Template Data ────────────────────────────────────────────────────────────
 
@@ -217,7 +106,7 @@ const templatesData = [
   { id: 3, title: "Rencana Belajar Semester", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "LOW", subtasks: 3, type: ["All", "Public"] },
   { id: 4, title: "Menulis Skripsi", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "HIGH", subtasks: 4, type: ["All", "Private"] },
   { id: 5, title: "Persiapan Ujian", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "LOW", subtasks: 2, type: ["All"] },
-  { id: 6, title: "Persiapan Presentasi", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "MIDLE", subtasks: 5, type: ["All", "Public", "Private"] },
+  { id: 6, title: "Persiapan Presentasi", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "MEDIUM", subtasks: 5, type: ["All", "Public", "Private"] },
   { id: 7, title: "Project PKM Mahasiswa", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "HIGH", subtasks: 4, type: ["Private"] },
 ];
 
@@ -303,24 +192,39 @@ const getDisplayName = () => {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
-  const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
-  const [searchTask, setSearchTask] = useState("");
-  const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
-  const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [taskDetailCopied, setTaskDetailCopied] = useState(false);
-  const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
+
+  // State variables
+
+  // Global States (in dashboard)
   const [apiTasks, setApiTasks] = useState<Task[]>([]);
   const [displayName, setDisplayName] = useState("User");
   const [energyData, setEnergyData] = useState({ current: 0, max: 240, percent: 0, isCritical: false });
-  const [isActionLoading, setIsActionLoading] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
   const [deadlineStats, setDeadlineStats] = useState({ upcoming: 0, overdue: 0 });
-  const [chartRange, setChartRange] = useState<ChartRange>("week");
-  const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
-  const [calendarRef, setCalendarRef] = useState(() => new Date());
+
+  // UI States or Nav states
+  const [activeMenu, setActiveMenu] = useState("dashboard"); // set which active menu: dashboard, task, template
+  const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
+  const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
+  const [notice, setNotice] = useState<string | null>(null); // for global notice or alert message
+
+
+ 
+
+  const [searchTask, setSearchTask] = useState("");
+  
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+ 
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [taskDetailCopied, setTaskDetailCopied] = useState(false);
+  const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
+  
+  
+  const [isActionLoading, setIsActionLoading] = useState(false);
+ 
+  
+  
+  
+  
 
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [addTaskTitle, setAddTaskTitle] = useState("");
