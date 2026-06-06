@@ -16,7 +16,6 @@ import {
   isGuestSession,
   startFocusSession,
   updateTask,
-  deleteTask,
   createTask,
 } from "../lib/api";
 
@@ -81,7 +80,7 @@ type ChartRange = "week" | "month" | "year"; // custom type for chart range
 
 const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
   week: {
-    labels: ["1 Jun", "2 Jun", "3 Jun", "4 Jun", "5 Jun", "6 Jun", "7 Jun"],
+    labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     data: [3, 4, 2, 3, 3, 4, 1],
   },
   month: {
@@ -232,18 +231,6 @@ export default function DashboardPage() {
   const [addTaskEnergy, setAddTaskEnergy] = useState<EnergyWeight>("Ringan");
   const [addTaskDeadline, setAddTaskDeadline] = useState("");
   const [addTaskDesc, setAddTaskDesc] = useState("");
-
-  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
-  const [editTaskId, setEditTaskId] = useState<string | null>(null);
-  
-  const [isDetailTaskModalOpen, setIsDetailTaskModalOpen] = useState(false);
-  const [detailTaskData, setDetailTaskData] = useState<any>(null);
-
-  const [isDeleteTaskModalOpen, setIsDeleteTaskModalOpen] = useState(false);
-  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
-
-  const [openTaskMenuId, setOpenTaskMenuId] = useState<string | null>(null);
-
   const [addTaskSubtasks, setAddTaskSubtasks] = useState<{ text: string; done: boolean }[]>([]);
   const [newSubtaskText, setNewSubtaskText] = useState("");
   const [localTaskMeta, setLocalTaskMeta] = useState<Record<string, { description: string; subtasks: { text: string; done: boolean }[] }>>({});
@@ -460,87 +447,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSaveEdit = async () => {
-    if (!editTaskId || !addTaskTitle.trim()) {
-      setNotice("Nama tugas tidak boleh kosong.");
-      return;
-    }
-    setIsActionLoading(true);
-    try {
-      await updateTask(editTaskId, {
-        title: addTaskTitle,
-        energy_weight: addTaskEnergy,
-        deadline: addTaskDeadline || null,
-      });
-      setLocalTaskMeta(prev => ({
-        ...prev,
-        [editTaskId]: {
-          description: addTaskDesc,
-          subtasks: prev[editTaskId]?.subtasks || [],
-        },
-      }));
-      setNotice("Tugas berhasil diperbarui.");
-      setIsEditTaskModalOpen(false);
-      setEditTaskId(null);
-      await loadDashboardData(true);
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Gagal memperbarui tugas.");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleDeleteTask = async () => {
-    if (!deleteTaskId) return;
-    setIsActionLoading(true);
-    try {
-      await deleteTask(deleteTaskId);
-      setNotice("Tugas berhasil dihapus.");
-      setIsDeleteTaskModalOpen(false);
-      setDeleteTaskId(null);
-      await loadDashboardData(true);
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Gagal menghapus tugas.");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleCompleteTask = async (taskId: string) => {
-    setIsActionLoading(true);
-    try {
-      await updateTask(taskId, { status: "done" });
-      setNotice("Tugas berhasil diselesaikan.");
-      await loadDashboardData(true);
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Gagal menyelesaikan tugas.");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: COLOR.surface, color: COLOR.text, fontFamily: "inherit" }}>
-      <style>{`
-        @keyframes dashRingBell {
-          0% { transform: rotate(0); }
-          10% { transform: rotate(15deg); }
-          20% { transform: rotate(-10deg); }
-          30% { transform: rotate(5deg); }
-          40% { transform: rotate(-5deg); }
-          50% { transform: rotate(2deg); }
-          60% { transform: rotate(0); }
-          100% { transform: rotate(0); }
-        }
-        .dash-bell-hover:hover svg {
-          animation: dashRingBell 0.5s ease-in-out;
-          transform-origin: top center;
-        }
-        @keyframes dashNotifPop {
-          from { opacity: 0; transform: translateY(10px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-      `}</style>
 
       {/* ═══════════════════════════════════════
           SIDEBAR
@@ -714,77 +622,22 @@ export default function DashboardPage() {
             </div>
 
             {/* Notification */}
-            <div style={{ position: "relative" }}>
-              <button
-                className="dash-bell-hover"
-                onClick={() => setShowNotifications(!showNotifications)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "6px",
-                  border: `1px solid ${showNotifications ? COLOR.primary : COLOR.border}`,
-                  background: showNotifications ? "#f0fdf4" : "none",
-                  color: showNotifications ? COLOR.primary : COLOR.mutedDark,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = COLOR.primary; e.currentTarget.style.color = COLOR.primary; }}
-                onMouseLeave={(e) => {
-                  if (!showNotifications) {
-                    e.currentTarget.style.borderColor = COLOR.border;
-                    e.currentTarget.style.color = COLOR.mutedDark;
-                  }
-                }}
-              >
-                <BellIcon />
-              </button>
-
-              {/* Notification Pop-up */}
-              {showNotifications && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "42px",
-                    right: 0,
-                    width: "320px",
-                    backgroundColor: COLOR.surface,
-                    borderRadius: "12px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-                    border: `1px solid ${COLOR.borderSoft}`,
-                    zIndex: 100,
-                    animation: "dashNotifPop 0.2s ease-out forwards",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div style={{ padding: "16px", borderBottom: `1px solid ${COLOR.borderSoft}`, backgroundColor: "#f9fafb" }}>
-                    <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: COLOR.text }}>Notifications & History</h3>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", maxHeight: "300px", overflowY: "auto" }}>
-                    <div style={{ padding: "16px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600, color: COLOR.text }}>Task Completed</div>
-                        <div style={{ width: "8px", height: "8px", backgroundColor: COLOR.primary, borderRadius: "50%", flexShrink: 0, marginTop: "4px" }} />
-                      </div>
-                      <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1.4 }}>You completed "Design Homepage UI". Great job!</div>
-                      <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "8px" }}>10 mins ago</div>
-                    </div>
-                    <div style={{ padding: "16px", borderBottom: `1px solid ${COLOR.borderSoft}`, backgroundColor: "#ffffff" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 500, color: COLOR.text, marginBottom: "4px" }}>New Task Added</div>
-                      <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1.4 }}>"Submit Invoice" has been added to your dashboard.</div>
-                      <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "8px" }}>1 hour ago</div>
-                    </div>
-                    <div style={{ padding: "16px", backgroundColor: "#ffffff" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 500, color: COLOR.text, marginBottom: "4px" }}>Template Created</div>
-                      <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1.4 }}>"Weekly Report" template was successfully saved.</div>
-                      <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "8px" }}>Yesterday</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "32px",
+                height: "32px",
+                borderRadius: "3px",
+                border: `1px solid ${COLOR.border}`,
+                background: "none",
+                color: COLOR.mutedDark,
+                cursor: "pointer",
+              }}
+            >
+              <BellIcon />
+            </button>
 
             {/* User Avatar + Name */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingLeft: "12px", borderLeft: `1px solid ${COLOR.borderSoft}` }}>
@@ -954,9 +807,7 @@ export default function DashboardPage() {
                 <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Task Completed</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ width: "42px", height: "42px", borderRadius: "10px", backgroundColor: "#e0f2fe", color: "#0284c7", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <CheckSquareIcon color="currentColor" size={24} />
-                    </div>
+                    <CheckSquareIcon />
                     <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{completedCount}</span>
                     <TrendBadge value="+10%" up />
                   </div>
@@ -967,9 +818,7 @@ export default function DashboardPage() {
                 <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Upcoming Deadlines</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ width: "42px", height: "42px", borderRadius: "10px", backgroundColor: "#fef08a", color: "#a16207", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <ClockAlertIcon color="currentColor" size={24} />
-                    </div>
+                    <ClockAlertIcon />
                     <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{upcomingDeadlineCount}</span>
                     <TrendBadge value="+10%" up />
                   </div>
@@ -980,9 +829,7 @@ export default function DashboardPage() {
                 <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Overdue Task</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ width: "42px", height: "42px", borderRadius: "10px", backgroundColor: "#fee2e2", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <AlertTriangleIcon color="currentColor" size={24} />
-                    </div>
+                    <AlertTriangleIcon />
                     <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{overdueCount}</span>
                     <TrendBadge value="-10%" up={false} />
                   </div>
@@ -992,37 +839,19 @@ export default function DashboardPage() {
                 {/* Energy */}
                 <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Energy</div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "4px" }}>
-                    {/* Circle Progress */}
-                    <div style={{ position: "relative", width: "48px", height: "48px", flexShrink: 0 }}>
-                      <svg viewBox="0 0 36 36" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
-                        <path
-                          style={{ fill: "none", stroke: "#E8E8E8", strokeWidth: 4 }}
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                        <path
-                          style={{ fill: "none", stroke: "#111827", strokeWidth: 4, strokeDasharray: `${energyData.percent}, 100`, transition: "stroke-dasharray 0.3s ease" }}
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                      </svg>
-                      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 700, color: COLOR.text }}>
-                        {energyData.percent}%
-                      </div>
-                    </div>
-
-                    {/* Linear Progress and Label */}
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
-                      <div style={{ width: "100%", height: "8px", backgroundColor: "#E8E8E8", borderRadius: "999px", overflow: "hidden" }}>
-                        <div style={{ width: `${energyData.percent}%`, height: "100%", backgroundColor: energyData.isCritical ? COLOR.danger : COLOR.primary, borderRadius: "999px", transition: "width 0.3s ease, background-color 0.3s ease" }} />
-                      </div>
-                      <div style={{ fontSize: "11px", color: COLOR.mutedDark, fontWeight: 500 }}>Capacity Energy</div>
-                    </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <BatteryIcon />
+                    <span style={{ fontSize: "24px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{energyData.percent}%</span>
+                    <span style={{ fontSize: "12px", color: COLOR.muted, fontWeight: 500, marginLeft: "auto" }}>{energyData.current} / {energyData.max} mins</span>
                   </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: energyData.isCritical ? COLOR.danger : COLOR.primary, fontWeight: 600, marginTop: "8px" }}>
-                    <div style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: energyData.isCritical ? COLOR.danger : COLOR.primary }} />
-                    {energyData.current === 0 ? "Depleted" : energyData.isCritical ? "Critical Energy" : "Ready for do Task"}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ width: "100%", height: "8px", backgroundColor: "#E8E8E8", borderRadius: "999px", overflow: "hidden" }}>
+                      <div style={{ width: `${energyData.percent}%`, height: "100%", backgroundColor: energyData.isCritical ? COLOR.danger : COLOR.primary, borderRadius: "999px", transition: "width 0.3s ease, background-color 0.3s ease" }} />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: energyData.isCritical ? COLOR.danger : COLOR.primary, fontWeight: 600 }}>
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: energyData.isCritical ? COLOR.danger : COLOR.primary }} />
+                      {energyData.current === 0 ? "Depleted" : energyData.isCritical ? "Critical Energy" : "Ready for do Task"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1043,7 +872,7 @@ export default function DashboardPage() {
                 <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
                     <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Priority Task</span>
-                    <span onClick={() => setActiveMenu("task")} style={{ fontSize: "12px", fontWeight: 600, color: "#3b82f6", cursor: "pointer", lineHeight: 1 }}>View all</span>
+                    <span onClick={() => setActiveMenu("task")} style={{ fontSize: "12px", color: COLOR.mutedDark, cursor: "pointer", lineHeight: 1 }}>View all</span>
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -1078,6 +907,9 @@ export default function DashboardPage() {
                           <PriorityBadge level={task.level} />
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
+                            <SubtaskIcon /> {task.subtask}
+                          </span>
                           <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
                             <CalendarSmIcon /> {task.date}
                           </span>
@@ -1258,28 +1090,77 @@ export default function DashboardPage() {
               <div id="recent-tasks-section" style={{ ...CARD_STYLE_COLOR, width: "100%", padding: 0, marginBottom: "32px", overflow: "hidden" }}>
                 <div style={{ height: "78px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 30px" }}>
                   <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Recent Tasks</span>
-                  <button style={{ background: "none", border: "none", color: "#3b82f6", fontSize: "14px", fontWeight: 600, cursor: "pointer", padding: 0 }}>View All</button>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    {/* Search in table */}
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: COLOR.muted, display: "flex" }}>
+                        <SearchIcon />
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Search task"
+                        value={searchTask}
+                        onChange={(e) => setSearchTask(e.target.value)}
+                        style={{
+                          width: "255px",
+                          height: "28px",
+                          borderRadius: "7px",
+                          border: "none",
+                          paddingLeft: "40px",
+                          paddingRight: "14px",
+                          fontSize: "12px",
+                          color: COLOR.text,
+                          backgroundColor: "#F1F1F1",
+                          fontFamily: "inherit",
+                          outline: "none",
+                        }}
+                      />
+                    </div>
+                    {/* Filter */}
+                    <button
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "7px",
+                        width: "78px",
+                        height: "32px",
+                        padding: 0,
+                        borderRadius: "7px",
+                        border: `1px solid ${COLOR.border}`,
+                        background: COLOR.surface,
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: COLOR.text,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      <FilterIcon /> Filter
+                    </button>
+                  </div>
                 </div>
 
                 {/* Table */}
                 <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                   <colgroup>
-                    <col style={{ width: "35%" }} />
+                    <col style={{ width: "33%" }} />
+                    <col style={{ width: "16%" }} />
+                    <col style={{ width: "17%" }} />
                     <col style={{ width: "20%" }} />
-                    <col style={{ width: "20%" }} />
-                    <col style={{ width: "25%" }} />
+                    <col style={{ width: "14%" }} />
                   </colgroup>
                   <thead>
-                    <tr style={{ height: "52px", backgroundColor: "#f9fafb", borderTop: `1px solid ${COLOR.border}`, borderBottom: `1px solid ${COLOR.border}` }}>
-                      {["TASK", "TASK LEVEL", "DUE DATE", "ACTIONS"].map((h, i) => (
+                    <tr style={{ height: "52px", backgroundColor: COLOR.panel, borderTop: `1px solid ${COLOR.border}`, borderBottom: `1px solid ${COLOR.border}` }}>
+                      {["TASK ↕", "TASK LEVEL ↕", "SUBTASK ↕", "DUE DATE ↕", "VIEW DETAIL ↕"].map((h) => (
                         <th
                           key={h}
                           style={{
-                            fontSize: "12px",
-                            fontWeight: 600,
+                            fontSize: "11px",
+                            fontWeight: 700,
                             color: COLOR.mutedDark,
-                            textAlign: i === 0 ? "left" : "center",
-                            padding: i === 0 ? "0 16px 0 clamp(58px, 4.5vw, 80px)" : "0 16px",
+                            textAlign: "center",
+                            padding: "0 16px",
                             letterSpacing: "0.02em",
                             whiteSpace: "nowrap",
                             verticalAlign: "middle",
@@ -1294,7 +1175,7 @@ export default function DashboardPage() {
                     {recentTaskItems.length === 0 ? (
                       <tr style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
                         <td
-                          colSpan={4}
+                          colSpan={5}
                           style={{
                             padding: "0 16px",
                             textAlign: "center",
@@ -1310,7 +1191,7 @@ export default function DashboardPage() {
                     ) : recentTaskItems.map((task) => (
                       <tr key={task.id ?? task.title} style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
                         <td style={{ padding: "0 16px 0 clamp(58px, 4.5vw, 80px)", verticalAlign: "middle" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "24px", minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "46px", minWidth: 0 }}>
                             <input
                               type="checkbox"
                               checked={!!task.done}
@@ -1319,33 +1200,30 @@ export default function DashboardPage() {
                                 void handleToggleTaskStatus(task, e.target.checked);
                               }}
                               style={{
-                                width: "24px",
-                                height: "24px",
+                                width: "16px",
+                                height: "16px",
                                 accentColor: COLOR.primary,
                                 borderRadius: "4px",
                                 cursor: "pointer",
                                 flexShrink: 0,
                               }}
                             />
-                            <span style={{ fontSize: "16px", fontWeight: 600, color: COLOR.text, lineHeight: 1.2, overflowWrap: "break-word" }}>{task.title}</span>
+                            <span style={{ fontSize: "13px", fontWeight: 700, color: COLOR.text, lineHeight: 1.2, overflowWrap: "break-word" }}>{task.title}</span>
                           </div>
                         </td>
                         <td style={{ padding: "0 16px", verticalAlign: "middle", textAlign: "center" }}>
                           <PriorityBadge level={task.level} />
                         </td>
-                        <td style={{ padding: "0 16px", fontSize: "14px", color: COLOR.text, fontWeight: 600, verticalAlign: "middle", textAlign: "center" }}>
+                        <td style={{ padding: "0 16px", fontSize: "13px", color: COLOR.text, verticalAlign: "middle", textAlign: "center" }}>
+                          {task.subtask}
+                        </td>
+                        <td style={{ padding: "0 16px", fontSize: "13px", color: COLOR.text, fontWeight: 700, verticalAlign: "middle", textAlign: "center" }}>
                           {task.date}
                         </td>
                         <td style={{ padding: "0 16px", verticalAlign: "middle" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px" }}>
-                            <button style={{ ...buttonReset, color: COLOR.mutedDark, display: "flex" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "34px" }}>
+                            <button style={{ ...buttonReset, color: COLOR.text, display: "flex" }}>
                               <MoreDotsIcon />
-                            </button>
-                            <button style={{ ...buttonReset, color: "#3b82f6", display: "flex" }}>
-                              <PenIcon />
-                            </button>
-                            <button style={{ ...buttonReset, color: "#ef4444", display: "flex" }}>
-                              <TrashIcon />
                             </button>
                             <button
                               disabled={isActionLoading}
@@ -1356,12 +1234,12 @@ export default function DashboardPage() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                padding: "8px 16px",
+                                padding: "6px 16px",
                                 minWidth: "110px",
-                                borderRadius: "24px",
-                                border: "1.5px solid #6b7280",
+                                borderRadius: "8px",
+                                border: "1px solid #d1d5db",
                                 backgroundColor: "#ffffff",
-                                fontSize: "13px",
+                                fontSize: "12px",
                                 fontWeight: 600,
                                 color: "#111827",
                                 cursor: "pointer",
@@ -1392,198 +1270,11 @@ export default function DashboardPage() {
             </>
           )}
 
-          {/* ── Task View (List) ── */}
-          {activeMenu === "task" && !selectedTaskId && templateView === "list" && (
-            <div style={{ ...CARD_STYLE, width: "100%", padding: 0, marginBottom: "32px", overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
-                <colgroup>
-                  <col style={{ width: "35%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "25%" }} />
-                </colgroup>
-                <thead>
-                  <tr style={{ height: "52px", backgroundColor: "#f9fafb", borderTop: `1px solid ${COLOR.border}`, borderBottom: `1px solid ${COLOR.border}` }}>
-                    {["TASK", "TASK LEVEL", "DUE DATE", "ACTIONS"].map((h, i) => (
-                      <th
-                        key={h}
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          color: COLOR.mutedDark,
-                          textAlign: i === 0 ? "left" : "center",
-                          padding: i === 0 ? "0 16px 0 clamp(58px, 4.5vw, 80px)" : "0 16px",
-                          letterSpacing: "0.02em",
-                          whiteSpace: "nowrap",
-                          verticalAlign: "middle",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentTaskItems.length === 0 ? (
-                    <tr style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
-                      <td
-                        colSpan={4}
-                        style={{
-                          padding: "0 16px",
-                          textAlign: "center",
-                          verticalAlign: "middle",
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: COLOR.mutedDark,
-                        }}
-                      >
-                        {emptyRecentTaskMessage}
-                      </td>
-                    </tr>
-                  ) : recentTaskItems.map((task) => (
-                    <tr key={task.id ?? task.title} style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
-                      <td style={{ padding: "0 16px 0 clamp(58px, 4.5vw, 80px)", verticalAlign: "middle" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "24px", minWidth: 0 }}>
-                          <input
-                            type="checkbox"
-                            checked={!!task.done}
-                            disabled={isActionLoading}
-                            onChange={(e) => {
-                              void handleToggleTaskStatus(task, e.target.checked);
-                            }}
-                            style={{
-                              width: "24px",
-                              height: "24px",
-                              accentColor: COLOR.primary,
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              flexShrink: 0,
-                            }}
-                          />
-                          <span style={{ fontSize: "16px", fontWeight: 600, color: COLOR.text, lineHeight: 1.2, overflowWrap: "break-word" }}>{task.title}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: "0 16px", verticalAlign: "middle", textAlign: "center" }}>
-                        <PriorityBadge level={task.level} />
-                      </td>
-                      <td style={{ padding: "0 16px", fontSize: "14px", color: COLOR.text, fontWeight: 600, verticalAlign: "middle", textAlign: "center" }}>
-                        {task.date}
-                      </td>
-                      <td style={{ padding: "0 16px", verticalAlign: "middle", position: "relative" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px" }}>
-                          <button onClick={() => {
-                            setOpenTaskMenuId(openTaskMenuId === task.id ? null : (task.id ?? null));
-                          }} style={{ ...buttonReset, color: COLOR.mutedDark, display: "flex", position: "relative" }}>
-                            <MoreDotsIcon />
-                          </button>
-                          {openTaskMenuId === task.id && (
-                            <div style={{
-                              position: "absolute",
-                              top: "100%", left: "50%",
-                              transform: "translateX(-50%)",
-                              marginTop: "8px",
-                              backgroundColor: "#ffffff",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                              border: `1px solid ${COLOR.borderSoft}`,
-                              zIndex: 100,
-                              width: "160px",
-                              display: "flex",
-                              flexDirection: "column",
-                              padding: "8px"
-                            }}>
-                              <button onClick={() => {
-                                setEditTaskId(task.id ?? null);
-                                setAddTaskTitle(task.title);
-                                setAddTaskDesc(localTaskMeta[task.id ?? ""]?.description || "");
-                                setAddTaskDeadline(task.date === "No due date" ? "" : task.date);
-                                setAddTaskEnergy(task.level === "LOW" ? "Ringan" : task.level === "MEDIUM" ? "Sedang" : "Berat");
-                                setIsEditTaskModalOpen(true);
-                                setOpenTaskMenuId(null);
-                              }} style={{ ...buttonReset, display: "flex", alignItems: "center", gap: "12px", padding: "10px", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: COLOR.text }}>
-                                <div style={{ width: "24px", height: "24px", borderRadius: "6px", backgroundColor: "#eff6ff", color: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center" }}><PenIcon /></div>
-                                Edit Task
-                              </button>
-                              <div style={{ height: "1px", backgroundColor: COLOR.borderSoft, margin: "4px 0" }} />
-                              <button onClick={() => {
-                                setDetailTaskData({ ...task, description: localTaskMeta[task.id ?? ""]?.description || "" });
-                                setIsDetailTaskModalOpen(true);
-                                setOpenTaskMenuId(null);
-                              }} style={{ ...buttonReset, display: "flex", alignItems: "center", gap: "12px", padding: "10px", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: COLOR.text }}>
-                                <div style={{ width: "24px", height: "24px", borderRadius: "6px", backgroundColor: "#f3f4f6", color: "#111827", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                </div>
-                                Detail Task
-                              </button>
-                              <div style={{ height: "1px", backgroundColor: COLOR.borderSoft, margin: "4px 0" }} />
-                              <button onClick={() => {
-                                void handleCompleteTask(task.id ?? "");
-                                setOpenTaskMenuId(null);
-                              }} style={{ ...buttonReset, display: "flex", alignItems: "center", gap: "12px", padding: "10px", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: COLOR.text }}>
-                                <div style={{ width: "24px", height: "24px", borderRadius: "6px", backgroundColor: "#dcfce7", color: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center" }}><CheckSquareIcon size={14} color="currentColor" /></div>
-                                Complete Task
-                              </button>
-                              <div style={{ height: "1px", backgroundColor: COLOR.borderSoft, margin: "4px 0" }} />
-                              <button onClick={() => {
-                                setDeleteTaskId(task.id ?? null);
-                                setIsDeleteTaskModalOpen(true);
-                                setOpenTaskMenuId(null);
-                              }} style={{ ...buttonReset, display: "flex", alignItems: "center", gap: "12px", padding: "10px", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "#ef4444" }}>
-                                <div style={{ width: "24px", height: "24px", borderRadius: "6px", backgroundColor: "#fee2e2", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}><TrashIcon /></div>
-                                Delete Task
-                              </button>
-                            </div>
-                          )}
-
-                          <button
-                            disabled={isActionLoading}
-                            onClick={() => {
-                              void handleStartFocus(task.id);
-                            }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              padding: "8px 16px",
-                              minWidth: "110px",
-                              borderRadius: "24px",
-                              border: "1.5px solid #6b7280",
-                              backgroundColor: "#ffffff",
-                              fontSize: "13px",
-                              fontWeight: 600,
-                              color: "#111827",
-                              cursor: "pointer",
-                              fontFamily: "inherit",
-                              whiteSpace: "nowrap",
-                              transition: "all 0.15s"
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isActionLoading) {
-                                e.currentTarget.style.backgroundColor = "#f9fafb";
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isActionLoading) {
-                                e.currentTarget.style.backgroundColor = "#ffffff";
-                              }
-                            }}
-                          >
-                            Mulai Fokus
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* ── Template View ── */}
-          {activeMenu === "template" && templateView === "list" && (
+          {/* ── Template / Task View ── */}
+          {(activeMenu === "template" || (activeMenu === "task" && !selectedTaskId)) && templateView === "list" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "clamp(28px, 3vw, 44px)", alignItems: "start" }}>
-                {templatesList
+                {cardItems
                   .filter((item) => item.type.includes(templateFilter))
                   .map((item) => (
                     <div key={item.id} style={{
@@ -1651,12 +1342,16 @@ export default function DashboardPage() {
                           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLOR.primaryHover; }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLOR.primary; }}
                         >
-                          Use Template
+                          {activeMenu === "task" ? "Mulai Fokus" : "Use Template"}
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedTemplateId(item.id);
-                            setTemplateView("detail");
+                            if (activeMenu === "template") {
+                              setSelectedTemplateId(item.id);
+                              setTemplateView("detail");
+                            } else if (activeMenu === "task" && item.taskId) {
+                              setSelectedTaskId(item.taskId);
+                            }
                           }}
                           style={{
                             width: "40px", height: "40px", borderRadius: "7px", border: `1px solid ${COLOR.border}`, backgroundColor: COLOR.surface,
@@ -1718,7 +1413,7 @@ export default function DashboardPage() {
                 <div style={{ padding: "20px 24px", borderBottom: "1px solid #e5e7eb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <h2 style={{ fontSize: "16px", fontWeight: 700, color: "#111827", margin: 0 }}>Task Detail</h2>
                   <button onClick={() => setSelectedTaskId(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6b7280" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
 
@@ -1726,11 +1421,11 @@ export default function DashboardPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", minHeight: "500px" }}>
                   {/* Left Column */}
                   <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
-
+                    
                     {/* Title */}
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", fontSize: "14px", fontWeight: 600, color: "#4b5563" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                         Title
                       </div>
                       <div style={{ padding: "16px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "20px", fontWeight: 700, color: "#111827" }}>
@@ -1741,7 +1436,7 @@ export default function DashboardPage() {
                     {/* Description */}
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", fontSize: "14px", fontWeight: 600, color: "#4b5563" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                         Description
                       </div>
                       <div style={{ padding: "16px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "14px", color: "#4b5563", minHeight: "100px", whiteSpace: "pre-wrap" }}>
@@ -1753,7 +1448,7 @@ export default function DashboardPage() {
                     <div>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: 600, color: "#4b5563" }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                           Subtasks
                         </div>
                         <div style={{ backgroundColor: "#f3f4f6", padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 700, color: "#4b5563" }}>
@@ -1767,14 +1462,14 @@ export default function DashboardPage() {
                             <div style={{ width: "20px", height: "20px", borderRadius: "4px", backgroundColor: st.done ? "#6366f1" : "#ffffff", border: st.done ? "none" : "1px solid #d1d5db", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }} onClick={() => {
                               const newSubs = [...taskSubtasks];
                               newSubs[idx] = { ...newSubs[idx], done: !newSubs[idx].done };
-                              setLocalTaskMeta(prev => ({ ...prev, [task.id]: { description: taskDescription, subtasks: newSubs } }));
+                              setLocalTaskMeta(prev => ({...prev, [task.id]: { description: taskDescription, subtasks: newSubs }}));
                             }}>
-                              {st.done && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                              {st.done && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                             </div>
                             <span style={{ fontSize: "14px", color: st.done ? "#9ca3af" : "#4b5563", textDecoration: st.done ? "line-through" : "none" }}>{st.text}</span>
                           </div>
                         ))}
-
+                        
                         <button style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "#6366f1", fontSize: "14px", fontWeight: 600, padding: 0, marginTop: "8px" }} onClick={() => setNotice("Adding subtasks after creation needs backend support.")}>
                           <span style={{ fontSize: "18px", fontWeight: 400 }}>+</span> Add subtask
                         </button>
@@ -1785,12 +1480,12 @@ export default function DashboardPage() {
 
                   {/* Right Column */}
                   <div style={{ borderLeft: "1px solid #e5e7eb", padding: "32px 24px", display: "flex", flexDirection: "column", gap: "32px" }}>
-
+                    
                     {/* Priority */}
                     <div>
                       <div style={{ fontSize: "11px", fontWeight: 700, color: "#6b7280", letterSpacing: "0.05em", marginBottom: "12px" }}>PRIORITY</div>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: energyLevel === "HIGH" ? "#16a34a" : energyLevel === "MEDIUM" ? "#f59e0b" : "#6b7280", color: "#ffffff", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
                         {energyLevel === "HIGH" ? "High Priority" : energyLevel === "MEDIUM" ? "Medium Priority" : "Low Priority"}
                       </div>
                     </div>
@@ -1799,7 +1494,7 @@ export default function DashboardPage() {
                     <div>
                       <div style={{ fontSize: "11px", fontWeight: 700, color: "#6b7280", letterSpacing: "0.05em", marginBottom: "12px" }}>DUE DATE</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 600, color: task.deadline && new Date(task.deadline) < new Date() ? "#dc2626" : "#4b5563" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         {task.deadline ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(task.deadline)) : "No due date"}
                         {task.deadline && new Date(task.deadline) < new Date() && " (Overdue)"}
                       </div>
@@ -1810,7 +1505,7 @@ export default function DashboardPage() {
                       <div style={{ fontSize: "11px", fontWeight: 700, color: "#6b7280", letterSpacing: "0.05em", marginBottom: "12px" }}>TASK LEVEL</div>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "13px", fontWeight: 700, color: "#16a34a" }}>
                         {task.energy_weight}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                       </div>
                     </div>
 
@@ -1824,11 +1519,11 @@ export default function DashboardPage() {
                     {/* Actions */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "8px" }}>
                       <button onClick={() => setNotice("Fitur edit task perlu endpoint backend tambahan.")} style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "#4b5563", fontSize: "13px", fontWeight: 600, padding: 0 }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-3.25-1.95" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-3.25-1.95"/></svg>
                         Update Task
                       </button>
                       <button onClick={() => setNotice("Fitur hapus task perlu endpoint backend tambahan.")} style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "#4b5563", fontSize: "13px", fontWeight: 600, padding: 0 }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         Delete Task
                       </button>
                     </div>
@@ -2278,8 +1973,8 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── Add / Edit Task Modal ── */}
-          {(isAddTaskModalOpen || isEditTaskModalOpen) && (
+          {/* ── Add Task Modal ── */}
+          {isAddTaskModalOpen && (
             <div style={{
               position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
               backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -2287,15 +1982,12 @@ export default function DashboardPage() {
               zIndex: 100, padding: "20px"
             }}>
               <div style={{
-                backgroundColor: "#ffffff", borderRadius: "8px",
-                width: "100%", maxWidth: "560px", padding: "32px",
+                backgroundColor: "#ffffff", borderRadius: "12px",
+                width: "100%", maxWidth: "640px", padding: "32px",
                 position: "relative", maxHeight: "90vh", overflowY: "auto",
               }}>
                 <button
-                  onClick={() => {
-                    setIsAddTaskModalOpen(false);
-                    setIsEditTaskModalOpen(false);
-                  }}
+                  onClick={() => setIsAddTaskModalOpen(false)}
                   style={{
                     position: "absolute", top: "24px", right: "24px",
                     background: "none", border: "none", cursor: "pointer",
@@ -2308,22 +2000,17 @@ export default function DashboardPage() {
                   </svg>
                 </button>
 
-                <h2 style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 24px", color: COLOR.text }}>
-                  {isEditTaskModalOpen ? "Edit Task" : "Add Task"}
-                </h2>
+                <h2 style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 8px", color: COLOR.text }}>Add Task</h2>
+                <p style={{ fontSize: "14px", color: COLOR.mutedDark, margin: "0 0 28px" }}>Buat tugas baru yang sesuai dengan keperluanmu.</p>
 
-                <div style={{ borderTop: `1px solid ${COLOR.borderSoft}`, margin: "0 -32px 24px" }} />
-
-                {/* Task Name */}
+                {/* Nama Tugas */}
                 <div style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>
-                    <span style={{ fontSize: "14px", fontWeight: "bold" }}>T</span> Task Name
-                  </label>
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>Nama Tugas</label>
                   <input
                     type="text"
                     value={addTaskTitle}
                     onChange={(e) => setAddTaskTitle(e.target.value)}
-                    placeholder="Enter Name Task"
+                    placeholder="Contoh : Membuat Power Point"
                     style={{
                       width: "100%", height: "48px", borderRadius: "8px", border: `1px solid ${COLOR.border}`,
                       padding: "0 16px", fontSize: "14px", color: COLOR.text, outline: "none",
@@ -2332,16 +2019,13 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                {/* Description */}
+                {/* Deskripsi */}
                 <div style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Description
-                  </label>
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>Deskripsi (Opsional)</label>
                   <textarea
                     value={addTaskDesc}
                     onChange={(e) => setAddTaskDesc(e.target.value)}
-                    placeholder="Deskripsi"
+                    placeholder="Jelaskan detail tugas Anda..."
                     rows={3}
                     style={{
                       width: "100%", borderRadius: "8px", border: `1px solid ${COLOR.border}`,
@@ -2351,11 +2035,103 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                {/* Due Date */}
+                {/* Subtasks */}
                 <div style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>
-                    <CalendarSmIcon /> Due Date
-                  </label>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", fontWeight: 600, color: COLOR.text }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                      Subtasks
+                    </label>
+                    {addTaskSubtasks.length > 0 && (
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: COLOR.muted }}>{addTaskSubtasks.length} item</span>
+                    )}
+                  </div>
+                  {addTaskSubtasks.length > 0 && (
+                    <div style={{ border: `1px solid ${COLOR.border}`, borderRadius: "8px", overflow: "hidden", marginBottom: "10px" }}>
+                      {addTaskSubtasks.map((sub, idx) => (
+                        <div key={idx} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 16px", borderBottom: idx < addTaskSubtasks.length - 1 ? `1px solid ${COLOR.borderSoft}` : "none" }}>
+                          <span style={{ flex: 1, fontSize: "14px", color: COLOR.text }}>{sub.text}</span>
+                          <button
+                            onClick={() => setAddTaskSubtasks(prev => prev.filter((_, i) => i !== idx))}
+                            style={{ ...buttonReset, color: "#9ca3af", padding: "2px", display: "flex" }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      type="text"
+                      value={newSubtaskText}
+                      onChange={(e) => setNewSubtaskText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newSubtaskText.trim()) {
+                          setAddTaskSubtasks(prev => [...prev, { text: newSubtaskText.trim(), done: false }]);
+                          setNewSubtaskText("");
+                        }
+                      }}
+                      placeholder="Tulis subtask dan tekan Enter..."
+                      style={{
+                        flex: 1, height: "40px", borderRadius: "8px", border: `1px solid ${COLOR.border}`,
+                        padding: "0 14px", fontSize: "13px", color: COLOR.text, outline: "none",
+                        boxSizing: "border-box", fontFamily: "inherit"
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (newSubtaskText.trim()) {
+                          setAddTaskSubtasks(prev => [...prev, { text: newSubtaskText.trim(), done: false }]);
+                          setNewSubtaskText("");
+                        }
+                      }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "4px",
+                        padding: "0 14px", height: "40px", borderRadius: "8px",
+                        border: "none", backgroundColor: COLOR.primaryPale, color: COLOR.primary,
+                        fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      <span style={{ fontSize: "16px", lineHeight: 1 }}>+</span> Add subtask
+                    </button>
+                  </div>
+                </div>
+
+                {/* Beban Energi */}
+                <div style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>Beban Energi</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+                    {[
+                      { id: "Ringan", label: "Ringan", desc: "Tugas ringan", color: "#16a34a" },
+                      { id: "Sedang", label: "Sedang", desc: "Tugas sedang", color: "#f59e0b" },
+                      { id: "Berat", label: "Berat", desc: "Tugas berat", color: "#ef4444" },
+                    ].map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => setAddTaskEnergy(item.id as EnergyWeight)}
+                        style={{
+                          border: `1px solid ${addTaskEnergy === item.id ? COLOR.primary : COLOR.border}`,
+                          borderRadius: "8px", padding: "16px", cursor: "pointer",
+                          backgroundColor: addTaskEnergy === item.id ? COLOR.primaryPale : "#ffffff",
+                          display: "flex", alignItems: "center", gap: "12px",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        <div style={{ width: "16px", height: "16px", borderRadius: "50%", backgroundColor: item.color }} />
+                        <div>
+                          <div style={{ fontSize: "14px", fontWeight: 700, color: COLOR.text }}>{item.label}</div>
+                          <div style={{ fontSize: "12px", color: COLOR.mutedDark }}>{item.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Deadline */}
+                <div style={{ marginBottom: "28px" }}>
+                  <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>Deadline (Opsional)</label>
                   <input
                     type="date"
                     value={addTaskDeadline}
@@ -2368,66 +2144,10 @@ export default function DashboardPage() {
                   />
                 </div>
 
-                {/* Task Level */}
-                <div style={{ marginBottom: "32px" }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>
-                    <span style={{ fontSize: "14px", fontWeight: "bold" }}>!</span> Task Level
-                  </label>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
-                    {[
-                      { id: "Ringan", label: "Low" },
-                      { id: "Sedang", label: "Medium" },
-                      { id: "Berat", label: "High" },
-                    ].map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => setAddTaskEnergy(item.id as EnergyWeight)}
-                        style={{
-                          border: `1.5px solid ${addTaskEnergy === item.id ? COLOR.primary : COLOR.border}`,
-                          borderRadius: "8px", height: "48px", cursor: "pointer",
-                          backgroundColor: addTaskEnergy === item.id ? "#f0fdf4" : "#ffffff",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          transition: "all 0.2s", position: "relative"
-                        }}
-                      >
-                        <span style={{ fontSize: "13px", fontWeight: addTaskEnergy === item.id ? 700 : 500, color: addTaskEnergy === item.id ? COLOR.primary : COLOR.text }}>
-                          {item.label}
-                        </span>
-                        {addTaskEnergy === item.id && (
-                          <div style={{ position: "absolute", top: "-6px", right: "-6px", width: "16px", height: "16px", borderRadius: "50%", backgroundColor: COLOR.primary, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ borderTop: `1px solid ${COLOR.borderSoft}`, margin: "0 -32px 24px" }} />
-
                 {/* Submit */}
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
                   <button
-                    onClick={() => {
-                      setIsAddTaskModalOpen(false);
-                      setIsEditTaskModalOpen(false);
-                    }}
-                    style={{
-                      height: "44px", padding: "0 24px", borderRadius: "8px",
-                      backgroundColor: "#ffffff", color: COLOR.text,
-                      fontSize: "14px", fontWeight: 600, border: `1px solid ${COLOR.border}`, cursor: "pointer"
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (isEditTaskModalOpen) {
-                        void handleSaveEdit();
-                      } else {
-                        void handleCreateTask();
-                      }
-                    }}
+                    onClick={() => void handleCreateTask()}
                     disabled={isActionLoading}
                     style={{
                       height: "44px", padding: "0 32px", borderRadius: "8px",
@@ -2436,152 +2156,10 @@ export default function DashboardPage() {
                       opacity: isActionLoading ? 0.7 : 1, transition: "opacity 0.2s"
                     }}
                   >
-                    {isActionLoading ? "Menyimpan..." : (isEditTaskModalOpen ? "Save Task" : "Add Task")}
+                    {isActionLoading ? "Menyimpan..." : "Buat Task"}
                   </button>
                 </div>
 
-              </div>
-            </div>
-          )}
-
-          {/* ── Task Details Modal ── */}
-          {isDetailTaskModalOpen && detailTaskData && (
-            <div style={{
-              position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.4)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              zIndex: 100, padding: "20px"
-            }}>
-              <div style={{
-                backgroundColor: "#ffffff", borderRadius: "8px",
-                width: "100%", maxWidth: "560px", padding: "32px",
-                position: "relative", maxHeight: "90vh", overflowY: "auto",
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                  <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: COLOR.text }}>Task Details</h2>
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", color: COLOR.text }}>
-                    <button onClick={() => {
-                      setEditTaskId(detailTaskData.id ?? null);
-                      setAddTaskTitle(detailTaskData.title);
-                      setAddTaskDesc(detailTaskData.description || "");
-                      setAddTaskDeadline(detailTaskData.date === "No due date" ? "" : detailTaskData.date);
-                      setAddTaskEnergy(detailTaskData.level === "LOW" ? "Ringan" : detailTaskData.level === "MEDIUM" ? "Sedang" : "Berat");
-                      setIsDetailTaskModalOpen(false);
-                      setIsEditTaskModalOpen(true);
-                    }} style={{ ...buttonReset, cursor: "pointer", display: "flex" }}>
-                      <PenIcon />
-                    </button>
-                    <button onClick={() => {
-                      setIsDetailTaskModalOpen(false);
-                      setOpenTaskMenuId(detailTaskData.id ?? null);
-                    }} style={{ ...buttonReset, cursor: "pointer", display: "flex" }}>
-                      <MoreDotsIcon />
-                    </button>
-                  </div>
-                </div>
-
-                <h3 style={{ fontSize: "18px", fontWeight: 600, color: COLOR.text, margin: "0 0 8px", lineHeight: 1.3 }}>{detailTaskData.title}</h3>
-                <p style={{ fontSize: "14px", color: COLOR.mutedDark, margin: "0 0 24px", lineHeight: 1.5 }}>
-                  {detailTaskData.description || "No description provided."}
-                </p>
-
-                <div style={{ border: `1px solid ${COLOR.borderSoft}`, borderRadius: "8px", padding: "16px", marginBottom: "16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>
-                    <span style={{ fontSize: "14px", fontWeight: "bold" }}>!</span> Priority
-                  </div>
-                  <PriorityBadge level={detailTaskData.level} />
-                </div>
-
-                <div style={{ border: `1px solid ${COLOR.borderSoft}`, borderRadius: "8px", padding: "16px", marginBottom: "32px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 600, color: COLOR.text, marginBottom: "8px" }}>
-                    <CalendarSmIcon /> Due Date
-                  </div>
-                  <div style={{ fontSize: "14px", fontWeight: 600, color: COLOR.text }}>{detailTaskData.date}</div>
-                </div>
-
-                <div style={{ borderTop: `1px solid ${COLOR.borderSoft}`, margin: "0 -32px 24px" }} />
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  <button
-                    onClick={() => {
-                      setEditTaskId(detailTaskData.id ?? null);
-                      setAddTaskTitle(detailTaskData.title);
-                      setAddTaskDesc(detailTaskData.description || "");
-                      setAddTaskDeadline(detailTaskData.date === "No due date" ? "" : detailTaskData.date);
-                      setAddTaskEnergy(detailTaskData.level === "LOW" ? "Ringan" : detailTaskData.level === "MEDIUM" ? "Sedang" : "Berat");
-                      setIsDetailTaskModalOpen(false);
-                      setIsEditTaskModalOpen(true);
-                    }}
-                    style={{
-                      height: "44px", width: "100%", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                      backgroundColor: COLOR.primary, color: "#ffffff",
-                      fontSize: "14px", fontWeight: 600, border: "none", cursor: "pointer"
-                    }}
-                  >
-                    <PenIcon /> Edit Task
-                  </button>
-                  <button
-                    onClick={() => setIsDetailTaskModalOpen(false)}
-                    style={{
-                      height: "44px", width: "100%", borderRadius: "8px",
-                      backgroundColor: "#ffffff", color: COLOR.mutedDark,
-                      fontSize: "14px", fontWeight: 600, border: `1px solid ${COLOR.border}`, cursor: "pointer"
-                    }}
-                  >
-                    Close Details
-                  </button>
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* ── Delete Task Modal ── */}
-          {isDeleteTaskModalOpen && (
-            <div style={{
-              position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.4)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              zIndex: 100, padding: "20px"
-            }}>
-              <div style={{
-                backgroundColor: "#ffffff", borderRadius: "12px",
-                width: "100%", maxWidth: "400px", padding: "40px 32px 32px",
-                display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center"
-              }}>
-                <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", color: "#b91c1c" }}>
-                  <AlertTriangleIcon size={32} color="currentColor" />
-                </div>
-                
-                <h2 style={{ fontSize: "22px", fontWeight: 700, margin: "0 0 12px", color: COLOR.text }}>Delete Task?</h2>
-                <p style={{ fontSize: "14px", color: COLOR.mutedDark, margin: "0 0 32px", lineHeight: 1.5 }}>
-                  Are you sure you want to delete this task? This action cannot be undone.
-                </p>
-
-                <div style={{ display: "flex", width: "100%", gap: "16px", justifyContent: "center" }}>
-                  <button
-                    onClick={() => setIsDeleteTaskModalOpen(false)}
-                    style={{
-                      flex: 1, height: "44px", borderRadius: "8px",
-                      backgroundColor: "transparent", color: COLOR.mutedDark,
-                      fontSize: "14px", fontWeight: 600, border: "none", cursor: "pointer"
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => void handleDeleteTask()}
-                    disabled={isActionLoading}
-                    style={{
-                      flex: 1, height: "44px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                      backgroundColor: "#b91c1c", color: "#ffffff",
-                      fontSize: "14px", fontWeight: 600, border: "none", cursor: "pointer",
-                      opacity: isActionLoading ? 0.7 : 1, transition: "opacity 0.2s"
-                    }}
-                  >
-                    <TrashIcon /> Delete
-                  </button>
-                </div>
               </div>
             </div>
           )}
