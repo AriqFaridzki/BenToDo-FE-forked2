@@ -5,6 +5,7 @@ import { LOGO_SRC } from "../../lib/assets";
 import { MenuOption, TemplateViewOption } from "../../dashboard/typesAndMaps";
 
 // 1. Define exactly what this component needs from the outside world
+
 interface SidebarProps {
   activeMenu: MenuOption;
   setActiveMenu: (menu: MenuOption) => void;

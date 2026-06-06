@@ -13,6 +13,13 @@ export type TemplateViewOption = "list" | "detail" | "create" | "success";
 
 export type PriorityLevel = "HIGH" | "MEDIUM" | "LOW";
 
+export type EnergyData ={
+  percent: number;
+  current: number;
+  max: number;
+  isCritical?: boolean;
+}
+
 export type ViewTask = {
   id?: string;
   title: string;
