@@ -1,8 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-
-
 // API AND FUNCTIONS CALL
 import {
   applyTemplate,
@@ -22,56 +20,22 @@ import {
 // CUSTOM DATA TYPES
 import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 
-
-//ICONS AND SVG ASSETS
-import { 
-  DashboardIcon, 
-  TaskIcon, 
-  TemplateIcon, 
-  SignOutIcon, 
-  SearchIcon, 
-  BellIcon, 
-  PlayIcon, 
-  CheckSquareIcon, 
-  ClockAlertIcon, 
-  AlertTriangleIcon, 
-  BatteryIcon, 
-  CalendarSmIcon, 
-  SubtaskIcon, 
-  FilterIcon, 
-  ChevronLeftIcon, 
-  ChevronRightIcon, 
-  MoreDotsIcon, 
-  TrendUpIcon, 
-  TrendDownIcon, 
-  CompassIcon, 
-  EyeOutlineIcon, 
-  UsersIcon, 
-  ShareIcon, 
-  WrenchIcon, 
-  MailIcon, 
-  UsersUpIcon, 
-  DownloadSquareIcon, 
-  ArrowLeftIcon, 
-  CalendarLineIcon, 
-  SuccessCheckIcon, 
-  CheckCircleSolidIcon, 
-  PlusCircleIcon} from "../components/ui/icons";
-
-  import { LOGO_SRC } from "../lib/assets"; // logo
-
 // COLOR
 import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE_COLOR, buttonReset} from "../components/ui/color"; 
 
-//badges
-import { TrendBadge, PriorityBadge } from "../components/ui/badge";
+import { 
+    mapTaskToCard, 
+    mapEnergyToLevel, 
+    mapTaskToViewTask, 
+    mapTemplateToCard,
+    ViewCard,
+    ViewTask,
+    ChartRange,
 
-//helper or utils
-import { getCalendarWeek } from "../lib/utils";
-import { MONTH_NAMES, DAY_HEADERS } from "../lib/utils";
-import { isSameDay } from "../lib/utils";
+    } from "./typeMapDashboard";
 
-type ChartRange = "week" | "month" | "year"; // custom type for chart range
+import { getDisplayName } from "../lib/utils";
+
 
 const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
   week: {
@@ -101,84 +65,6 @@ const templatesData = [
 ];
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
-
-type PriorityLevel = "HIGH" | "MEDIUM" | "LOW";
-
-type ViewTask = {
-  id?: string;
-  title: string;
-  level: PriorityLevel;
-  subtask: string;
-  date: string;
-  done?: boolean;
-  status?: TaskStatus;
-};
-
-type ViewCard = {
-  id: number;
-  backendKey?: string;
-  taskId?: string;
-  title: string;
-  desc: string;
-  level: string;
-  subtasks: number;
-  type: string[];
-  previewItems?: TaskTemplate["preview_items"];
-};
-
-const mapEnergyToLevel = (energyWeight: EnergyWeight): PriorityLevel => {
-  if (energyWeight === "Berat") return "HIGH";
-  if (energyWeight === "Sedang") return "MEDIUM";
-  return "LOW";
-};
-
-const formatDate = (value: string | null) => {
-  if (!value) return "No due date";
-
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
-};
-
-const mapTaskToViewTask = (task: Task): ViewTask => ({
-  id: task.id,
-  title: task.title,
-  level: mapEnergyToLevel(task.energy_weight),
-  subtask: task.source_template ? `Template: ${task.source_template}` : task.status,
-  date: formatDate(task.deadline),
-  done: task.status === "done",
-  status: task.status,
-});
-
-const mapTemplateToCard = (template: TaskTemplate, index: number): ViewCard => ({
-  id: index + 1,
-  backendKey: template.key,
-  title: template.name,
-  desc: template.description,
-  level: "OFFICIAL",
-  subtasks: template.total_items,
-  type: ["All", "Public"],
-  previewItems: template.preview_items,
-});
-
-const mapTaskToCard = (task: Task, index: number): ViewCard => ({
-  id: index + 1,
-  taskId: task.id,
-  title: task.title,
-  desc: task.source_template
-    ? `Task dari template ${task.source_template}`
-    : `Status: ${task.status.replace("_", " ")}`,
-  level: mapEnergyToLevel(task.energy_weight),
-  subtasks: task.used_timer ? task.timer_duration ?? 0 : 0,
-  type: ["All", task.status === "done" ? "Public" : "Private"],
-});
-
-const getDisplayName = () => {
-  const user = getStoredUser();
-  return user?.display_name || user?.email?.split("@")[0] || "User";
-};
 
 
 
@@ -370,7 +256,7 @@ export function useDashboard() {
         }
       };
     
-      const handleStartFocus = async (taskId?: string) => {
+    const handleStartFocus = async (taskId?: string) => {
         if (!taskId) {
           router.push("/focus");
           return;
@@ -388,7 +274,7 @@ export function useDashboard() {
         }
       };
     
-      const handleUseCard = async (item: ViewCard) => {
+    const handleUseCard = async (item: ViewCard) => {
         if (activeMenu === "task") {
           await handleStartFocus(item.taskId);
           return;
@@ -413,7 +299,7 @@ export function useDashboard() {
         }
       };
     
-      const handleCreateTask = async () => {
+    const handleCreateTask = async () => {
         if (!addTaskTitle.trim()) {
           setNotice("Nama tugas tidak boleh kosong.");
           return;
@@ -481,6 +367,40 @@ return {
         isActionLoading,
         selectedTemplateId,
         newTemplate,
+
+        setApiTasks,
+        setDisplayName,
+        setEnergyData,
+        setDeadlineStats,
+        setActiveMenu,
+
+        setNotice,
+
+        setChartRange,
+        setTimeRange,
+        setChartDropdownOpen,
+        setCalendarRef,
+
+        setSelectedTaskId,
+        setTaskDetailCopied,
+        setIsAddTaskModalOpen,
+        setAddTaskTitle,
+        setAddTaskEnergy,
+        setAddTaskDeadline,
+        setAddTaskDesc,
+        setAddTaskSubtasks,
+        setNewSubtaskText,
+
+        setLocalTaskMeta,
+        setSearchTask,
+        setIsActionLoading,
+
+        setSelectedTemplateId,
+        setNewTemplate,
+        setTemplateFilter,
+        setTemplateView,
+        setTemplatesList,
+
 
         // MEMOS
         filteredTasks,
