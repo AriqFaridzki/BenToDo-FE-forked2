@@ -116,7 +116,7 @@ const {
                                     whiteSpace: "nowrap",
                                     verticalAlign: "middle",
                                   }}>
-                                TASK
+                                TASK TITLE
                               </th>
                               {["TASK LEVEL ", "DUE DATE ", "ACTIONS"].map((h) => (
                                 <th
