@@ -5,11 +5,7 @@ import { useState } from "react";
 import { getCalendarWeek, DAY_HEADERS } from "../../lib/utils";
 import { COLOR } from "../ui/color";
 
- // Line Chart States
-  export const [chartRange, setChartRange] = useState<ChartRange>("week");
-  export const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
-  export const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
-  export const [calendarRef, setCalendarRef] = useState(() => new Date());
+
 
 type ChartRange = "week" | "month" | "year"; // custom type for chart range
 
@@ -37,6 +33,8 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRange }) {
   const maxVal = Math.max(...data) + 2;
   const chartW = width - padX * 2;
   const chartH = height - padY * 2;
+
+
 
   const totalValue = data.reduce((sum, v) => sum + v, 0);
   const avgValue = data.length ? (totalValue / data.length).toFixed(1) : "0";

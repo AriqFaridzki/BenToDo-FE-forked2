@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useDashboard } from "./useDashboard"
+
 // API AND FUNCTIONS CALL
 import {
   applyTemplate,
@@ -71,7 +73,6 @@ import { isSameDay } from "../lib/utils";
 import { ProductivityChart } from "../components/features/ProductivityCharts";
 
 //import Line Charts States
-import {chartRange, setChartRange, timeRange, setTimeRange, chartDropdownOpen, setChartDropdownOpen, calendarRef, setCalendarRef} from "../components/features/ProductivityCharts";
 
 // ─── Mini Line Chart (SVG) ────────────────────────────────────────────────────
 // Data Labels: Week (Sun-Sat), Month (Week 1-4), Year (Jan-Dec)
@@ -207,33 +208,37 @@ export default function DashboardPage() {
   const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
   const [notice, setNotice] = useState<string | null>(null); // for global notice or alert message
 
-
+  // Line Chart States
+  const [chartRange, setChartRange] = useState<ChartRange>("week");
+  const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
+  const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
+  const [calendarRef, setCalendarRef] = useState(() => new Date());
  
-
-  const [searchTask, setSearchTask] = useState("");
   
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  //Task Related States
  
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [taskDetailCopied, setTaskDetailCopied] = useState(false);
+  const [taskDetailCopied, setTaskDetailCopied] = useState(false); // to show "copied" state when user copy task detail in task detail view
   const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
-  
-  
-  const [isActionLoading, setIsActionLoading] = useState(false);
- 
-  
-  
-  
-  
-
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  
+  // Create Task Form States
   const [addTaskTitle, setAddTaskTitle] = useState("");
   const [addTaskEnergy, setAddTaskEnergy] = useState<EnergyWeight>("Ringan");
   const [addTaskDeadline, setAddTaskDeadline] = useState("");
   const [addTaskDesc, setAddTaskDesc] = useState("");
   const [addTaskSubtasks, setAddTaskSubtasks] = useState<{ text: string; done: boolean }[]>([]);
   const [newSubtaskText, setNewSubtaskText] = useState("");
+
   const [localTaskMeta, setLocalTaskMeta] = useState<Record<string, { description: string; subtasks: { text: string; done: boolean }[] }>>({});
+ 
+  // utility states
+  const [searchTask, setSearchTask] = useState("");
+
+  const [isActionLoading, setIsActionLoading] = useState(false);
+
+  //template related states
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
 
   const [newTemplate, setNewTemplate] = useState({
     title: "",
@@ -245,13 +250,18 @@ export default function DashboardPage() {
     label: "PRIVATE"
   });
 
-  const loadDashboardData = useCallback(async (silent = false) => {
+  // Ambil Data dari BE dan cek pengguna user / guest.
+  const loadDashboardData = useCallback(async (silent = false) => { 
+
+    // Check Logins session. why is this here.....
     if (!hasActiveSession()) {
       router.replace("/login");
       return;
     }
 
-    if (!silent) setNotice(null);
+    if (!silent) setNotice(null); //set notice
+
+    // Guest Mode 
 
     try {
       const guest = isGuestSession();
@@ -266,6 +276,7 @@ export default function DashboardPage() {
       setDisplayName(getDisplayName());
       setApiTasks(tasksResult.data);
       setTemplatesList(templatesResult.data.map(mapTemplateToCard));
+
       const currentTime = Date.now();
       setDeadlineStats({
         upcoming: tasksResult.data.filter((task) => {
@@ -279,6 +290,7 @@ export default function DashboardPage() {
             new Date(task.deadline).getTime() < currentTime;
         }).length,
       });
+
       setEnergyData({
         current: energyResult.data.current_energy,
         max: energyResult.data.max_energy,
@@ -298,6 +310,8 @@ export default function DashboardPage() {
     }
   }, [router]);
 
+
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void loadDashboardData();
@@ -305,6 +319,8 @@ export default function DashboardPage() {
 
     return () => window.clearTimeout(timer);
   }, [loadDashboardData]);
+
+
 
   const filteredTasks = useMemo(() => {
     const keyword = searchTask.trim().toLowerCase();
@@ -449,6 +465,8 @@ export default function DashboardPage() {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: COLOR.surface, color: COLOR.text, fontFamily: "inherit" }}>
+
+
 
       {/* ═══════════════════════════════════════
           SIDEBAR
