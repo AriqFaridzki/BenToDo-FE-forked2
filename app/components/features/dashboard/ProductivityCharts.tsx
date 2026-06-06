@@ -3,7 +3,7 @@
 
 import { getCalendarWeek } from "../../../lib/utils";
 import { COLOR } from "../../ui/color";
-import { DAY_HEADERS } from "../../../dashboard/typeMapAndConstDashboard";
+import { DAY_HEADERS } from "../../../dashboard/typesAndMaps";
 
 
 type ChartRange = "week" | "month" | "year"; // custom type for chart range

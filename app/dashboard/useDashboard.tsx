@@ -32,7 +32,7 @@ import {
     ViewTask,
     ChartRange,
 
-    } from "./typeMapAndConstDashboard";
+    } from "./typesAndMaps";
 
 import { getDisplayName } from "../lib/utils";
 
@@ -79,8 +79,6 @@ export function useDashboard() {
     
       // UI States or Nav states
       const [activeMenu, setActiveMenu] = useState("dashboard"); // set which active menu: dashboard, task, template
-      const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
-      const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
       const [notice, setNotice] = useState<string | null>(null); // for global notice or alert message
     
       // Line Chart States
@@ -93,7 +91,6 @@ export function useDashboard() {
       //Task Related States
       const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
       const [taskDetailCopied, setTaskDetailCopied] = useState(false); // to show "copied" state when user copy task detail in task detail view
-      const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
       const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
       
       // Create Task Form States
@@ -121,6 +118,9 @@ export function useDashboard() {
         status: "TO DO",
         label: "PRIVATE"
       });
+      const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
+      const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
+      const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
 
     // Load API Data for Dashboard
     const loadDashboardData = useCallback(async (silent = false) => { 

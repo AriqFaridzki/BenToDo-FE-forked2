@@ -2,14 +2,14 @@
 import {COLOR} from "../ui/color";
 import { DashboardIcon, TaskIcon, TemplateIcon, SignOutIcon } from "../ui/icons";
 import { LOGO_SRC } from "../../lib/assets";
-
+import { MenuOption, TemplateViewOption } from "../../dashboard/typesAndMaps";
 
 // 1. Define exactly what this component needs from the outside world
 interface SidebarProps {
-  activeMenu: string;
-  setActiveMenu: (menu: string) => void;
-  setSelectedTemplateId: (id: string | null) => void;
-  setTemplateView: (view: string) => void;
+  activeMenu: MenuOption;
+  setActiveMenu: (menu: MenuOption) => void;
+  setSelectedTemplateId: (id: number | null) => void;
+  setTemplateView: (view: TemplateViewOption) => void;
   handleSignOut: () => void;
 }
 
@@ -72,7 +72,7 @@ const {
                 { key: "task", label: "Task", icon: <TaskIcon /> },
                 { key: "template", label: "Template", icon: <TemplateIcon /> },
             ].map(({ key, label, icon }) => (
-                
+
                 <button
                 key={key}
                 onClick={() => {

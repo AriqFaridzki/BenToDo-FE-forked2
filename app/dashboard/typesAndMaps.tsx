@@ -7,6 +7,9 @@ import { formatDate } from "../lib/utils";
 export const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
+export type MenuOption = "dashboard" | "task" | "template";
+export type TemplateViewOption = "list" | "detail" | "create" | "success";
+
 
 export type PriorityLevel = "HIGH" | "MEDIUM" | "LOW";
 
