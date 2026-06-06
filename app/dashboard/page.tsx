@@ -70,6 +70,7 @@ import { ProductivityChart } from "../components/features/dashboard/Productivity
 
 import { Sidebar } from "../components/layout/Sidebar";
 import { TopHeader } from "../components/layout/topHeader";
+import { WelcomeBanner } from "../components/features/dashboard/WelcomeBanner";
 
 
 export default function DashboardPage() {
@@ -199,108 +200,18 @@ export default function DashboardPage() {
           )}
 
           {/* Welcome + Time Range + Focus Timer */}
-          {(activeMenu === "dashboard" || (activeMenu === "template" && templateView === "list") || (activeMenu === "task" && !selectedTaskId)) && (
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", width: "100%", marginBottom: "32px", gap: "24px" }}>
-              <div>
-                <h2 style={{ fontSize: "26px", fontWeight: 700, color: COLOR.text, margin: "0 0 6px", lineHeight: 1.15 }}>
-                  Welcome, {displayName}
-                </h2>
-                <p style={{ fontSize: "12px", color: COLOR.text, margin: 0, lineHeight: 1.4 }}>
-                  Here&apos;s what&apos;s happening with your workspace today.
-                </p>
-              </div>
+          {
+          (
+          dashboardStates.activeMenu === "dashboard"     ||
 
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-                {/* Toggle Buttons */}
-                <div
-                  style={{
-                    display: "flex",
-                    borderRadius: "3px",
-                    backgroundColor: "#F1F1F1",
-                    padding: "2px",
-                    overflow: "hidden",
-                  }}
-                >
-                  {activeMenu === "dashboard" ? (
-                    (["Daily", "Weekly", "Monthly", "Yearly"] as const).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setTimeRange(t)}
-                        style={{
-                          width: "64px",
-                          height: "32px",
-                          fontSize: "11px",
-                          fontWeight: timeRange === t ? 600 : 400,
-                          fontFamily: "inherit",
-                          color: COLOR.text,
-                          backgroundColor: timeRange === t ? COLOR.surface : "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {t}
-                      </button>
-                    ))
-                  ) : (
-                    (["All", "Public", "Private"] as const).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setTemplateFilter(t)}
-                        style={{
-                          width: "64px",
-                          height: "32px",
-                          fontSize: "11px",
-                          fontWeight: templateFilter === t ? 600 : 400,
-                          fontFamily: "inherit",
-                          color: COLOR.text,
-                          backgroundColor: templateFilter === t ? COLOR.surface : "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {t}
-                      </button>
-                    ))
-                  )}
-                </div>
+          (dashboardStates.activeMenu === "template" && dashboardStates.templateView === "list")       || 
 
-                {/* Start Focus Timer Button */}
-                <button
-                  onClick={() => {
-                    if (activeMenu === "dashboard") {
-                      void handleStartFocus(priorityTaskItems[0]?.id);
-                    } else if (activeMenu === "task") {
-                      setIsAddTaskModalOpen(true);
-                    } else if (activeMenu === "template") {
-                      setTemplateView("create");
-                    }
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    minWidth: activeMenu === "dashboard" ? "158px" : "160px",
-                    height: "34px",
-                    padding: "0 16px",
-                    borderRadius: "4px",
-                    backgroundColor: COLOR.primary,
-                    color: "#ffffff",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    transition: "background-color 0.15s",
-                  }}
-                >
-                  {activeMenu === "dashboard" ? <PlayIcon /> : <span style={{ fontSize: "16px", fontWeight: "bold", lineHeight: 1 }}>+</span>}
-                  {activeMenu === "dashboard" ? "Start Focus Timer" : activeMenu === "task" ? "Task Baru" : "Template Baru"}
-                </button>
-              </div>
-            </div>
+          (dashboardStates.activeMenu === "task" && !dashboardStates.selectedTaskId)
+        ) && 
+          
+          (
+            <WelcomeBanner dashboardStates={dashboardStates} />
+        
           )}
 
           {/* ── Dashboard View ── */}
