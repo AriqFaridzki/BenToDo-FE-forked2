@@ -61,7 +61,7 @@ import {
 
 
 //Components
-import { ProductivityChart } from "../components/features/ProductivityCharts";
+import { ProductivityChart } from "../components/features/dashboard/ProductivityCharts";
 
 export default function DashboardPage() {
   const router = useRouter();
