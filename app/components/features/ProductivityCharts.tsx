@@ -79,7 +79,7 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRange }) {
         padding: "0 4px" 
       }}>
         <span style={{ fontSize: "11px", color: COLOR.muted, fontWeight: 500 }}>
-          Tugas Selesai Dikejakan:
+          Tugas Selesai Dikerjakan:
         </span>
         <div style={{ fontSize: "12px", color: COLOR.text, fontWeight: 500 }}>
           <span>Total: <strong style={{ color: COLOR.primary }}>{totalValue} Jam</strong></span>
