@@ -32,7 +32,7 @@ import {
     ViewTask,
     ChartRange,
 
-    } from "./typeMapDashboard";
+    } from "./typeMapAndConstDashboard";
 
 import { getDisplayName } from "../lib/utils";
 
