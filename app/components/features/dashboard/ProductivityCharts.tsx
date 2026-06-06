@@ -5,7 +5,6 @@ import { getCalendarWeek, DAY_HEADERS } from "../../../lib/utils";
 import { COLOR } from "../../ui/color";
 
 
-
 type ChartRange = "week" | "month" | "year"; // custom type for chart range
 
 const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {

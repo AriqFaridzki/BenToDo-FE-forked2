@@ -4,7 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useDashboard } from "./useDashboard"
-import { ChartRange,mapEnergyToLevel,ViewCard } from "./typeMapDashboard";
+import { 
+  ChartRange,
+  mapEnergyToLevel,
+  ViewCard, 
+  MONTH_NAMES,
+  DAY_HEADERS, } from "./typeMapDashboard";
+
 
 import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 
@@ -52,8 +58,6 @@ import { TrendBadge, PriorityBadge } from "../components/ui/badge";
 //helper or utils
 import { 
   getCalendarWeek,
-  MONTH_NAMES, 
-  DAY_HEADERS,
   isSameDay,
   formatDate,
 

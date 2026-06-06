@@ -4,6 +4,10 @@ import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 import { formatDate } from "../lib/utils";
 
 
+export const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+
 export type PriorityLevel = "HIGH" | "MEDIUM" | "LOW";
 
 export type ViewTask = {
