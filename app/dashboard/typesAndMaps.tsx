@@ -9,6 +9,7 @@ export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export type MenuOption = "dashboard" | "task" | "template";
 export type TemplateViewOption = "list" | "detail" | "create" | "success";
+export type TemplateFilterOption = "All" | "Public" | "Private";
 
 
 export type PriorityLevel = "HIGH" | "MEDIUM" | "LOW";
