@@ -114,7 +114,7 @@ export function useDashboard() {
         desc: "",
         deadline: "",
         category: "WORK",
-        priority: "MIDLE",
+        priority: "MEDIUM",
         status: "TO DO",
         label: "PRIVATE"
       });

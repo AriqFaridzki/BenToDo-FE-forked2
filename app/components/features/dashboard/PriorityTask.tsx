@@ -1,67 +1,32 @@
-// ─── SIDEBAR COMPONENT ────────────────────────────────────────────────────────
-import {COLOR} from "../../ui/color";
-import { CompassIcon,SubtaskIcon,CalendarSmIcon,EyeOutlineIcon } from "../../ui/icons";
-import { MenuOption, TemplateViewOption, TemplateFilterOption } from "../../../dashboard/typesAndMaps";
-
-
+// ─── Priority Task COMPONENT ────────────────────────────────────────────────────────
+import {COLOR, CARD_STYLE_COLOR} from "../../ui/color";
+import { SubtaskIcon,CalendarSmIcon } from "../../ui/icons";
+import { MenuOption, TemplateViewOption,  } from "../../../dashboard/typesAndMaps";
+import { PriorityBadge } from "../../ui/badge";
+import { Task } from "../../../lib/api";
 
 // 1. Define exactly what this component needs from the outside world
-interface TemplateListViewProps {
+interface PriorityTaskProps {
   
   
   // Values
     activeMenu: MenuOption;
-    cardItems: Array<{
-      id: number;
-      title: string;
-      desc: string;
-      level: string;
-      subtasks: number;
-      type?: string;
-      taskId?: string;
-    }>; 
-
-    templateFilter: TemplateFilterOption;
-
-    //Handlers
-    handleUseCard: (item: any) => void;
-
-
-
-  // Setters
-    setTemplateView: (view: TemplateViewOption) => void;
-    setSelectedTemplateId: (id: number | null) => void;
-    setSelectedTaskId: (id: string | null) => void;
+    priorityTaskItems: any[]; // replace with actual type of task items
+   
   
 }
-
-// const cardConfig = { // common style for all Statcards
-//     ...CARD_STYLE_COLOR,
-//   width: "100%", 
-//   minHeight: "136px", 
-//   padding: "20px clamp(18px, 2.8vw, 32px)", 
-//   boxSizing: "border-box", 
-//   display: "flex", 
-//   flexDirection: "column", 
-//   justifyContent: "space-between" 
-// } as const;
-
 // 2. Accept those needs as parameters (props)
-export function TemplateListView({dashboardStates}: {dashboardStates: any}) {
+export function PriorityTask({dashboardStates}: {dashboardStates: any}) {
 
 const {
-    activeMenu,
-    cardItems,
-    templateFilter,
-    handleUseCard,
-    setSelectedTemplateId,
-    setTemplateView,
-    setSelectedTaskId,
+    setActiveMenu,
+    priorityTaskItems,
+    
 
 } = dashboardStates;
 
     return (
-<div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
+            <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
                     <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Priority Task</span>
                     <span onClick={() => setActiveMenu("task")} style={{ fontSize: "12px", color: COLOR.mutedDark, cursor: "pointer", lineHeight: 1 }}>View all</span>
@@ -84,7 +49,7 @@ const {
                       >
                         Belum ada priority task
                       </div>
-                    ) : priorityTaskItems.map((task) => (
+                    ) : priorityTaskItems.map((task: any) => (
                       <div
                         key={task.id ?? task.title}
                         style={{

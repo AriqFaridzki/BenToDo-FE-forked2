@@ -72,7 +72,7 @@ import { WelcomeBanner } from "../components/features/dashboard/WelcomeBanner";
 
 import { StatCards } from "../components/features/dashboard/StatCards";
 import { TemplateListView } from "../components/features/templates/TemplateListView";
-
+import { PriorityTask } from "../components/features/dashboard/PriorityTask";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -234,55 +234,7 @@ export default function DashboardPage() {
                 }}
               >
                 {/* Priority Task Card */}
-                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
-                    <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Priority Task</span>
-                    <span onClick={() => setActiveMenu("task")} style={{ fontSize: "12px", color: COLOR.mutedDark, cursor: "pointer", lineHeight: 1 }}>View all</span>
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                    {priorityTaskItems.length === 0 ? (
-                      <div
-                        style={{
-                          backgroundColor: "#F1F1F1",
-                          borderRadius: "7px",
-                          padding: "18px clamp(16px, 1.8vw, 24px)",
-                          minHeight: "80px",
-                          display: "flex",
-                          alignItems: "center",
-                          color: COLOR.mutedDark,
-                          fontSize: "13px",
-                          fontWeight: 600,
-                        }}
-                      >
-                        Belum ada priority task
-                      </div>
-                    ) : priorityTaskItems.map((task) => (
-                      <div
-                        key={task.id ?? task.title}
-                        style={{
-                          backgroundColor: "#F1F1F1",
-                          borderRadius: "7px",
-                          padding: "18px clamp(16px, 1.8vw, 24px)",
-                          minHeight: "80px",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "15px", gap: "14px" }}>
-                          <span style={{ flex: 1, minWidth: 0, fontSize: "14px", fontWeight: 700, color: COLOR.text, lineHeight: 1.25, whiteSpace: "normal", wordBreak: "normal", overflowWrap: "break-word" }}>{task.title}</span>
-                          <PriorityBadge level={task.level} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
-                            <SubtaskIcon /> {task.subtask}
-                          </span>
-                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
-                            <CalendarSmIcon /> {task.date}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <PriorityTask dashboardStates={dashboardStates} />
 
                 {/* Productivity Overview Chart */}
                 <div style={{ ...CARD_STYLE_COLOR, padding: "24px clamp(18px, 2vw, 32px)", gridColumn: "2", gridRow: "1 / span 2", minHeight: "386px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
