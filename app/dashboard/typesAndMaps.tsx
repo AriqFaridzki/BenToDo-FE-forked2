@@ -6,6 +6,8 @@ import { formatDate } from "../lib/utils";
 
 export const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+export type ChartRangeOption = "week" | "month" | "year"; // custom type for chart range
+
 
 export type MenuOption = "dashboard" | "task" | "template";
 export type TemplateViewOption = "list" | "detail" | "create" | "success";
@@ -31,7 +33,6 @@ export type ViewTask = {
   status?: TaskStatus;
 };
 
-export type ChartRange = "week" | "month" | "year"; // custom type for chart range
 
 export type ViewCard = {
   id: number;

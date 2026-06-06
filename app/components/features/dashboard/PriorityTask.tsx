@@ -3,7 +3,6 @@ import {COLOR, CARD_STYLE_COLOR} from "../../ui/color";
 import { SubtaskIcon,CalendarSmIcon } from "../../ui/icons";
 import { MenuOption, TemplateViewOption,  } from "../../../dashboard/typesAndMaps";
 import { PriorityBadge } from "../../ui/badge";
-import { Task } from "../../../lib/api";
 
 // 1. Define exactly what this component needs from the outside world
 interface PriorityTaskProps {

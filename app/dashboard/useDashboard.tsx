@@ -30,14 +30,14 @@ import {
     mapTemplateToCard,
     ViewCard,
     ViewTask,
-    ChartRange,
+    ChartRangeOption,
 
     } from "./typesAndMaps";
 
 import { getDisplayName } from "../lib/utils";
 
 
-const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
+const CHART_DATA: Record<ChartRangeOption, { labels: string[]; data: number[] }> = {
   week: {
     labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     data: [3, 4, 2, 3, 3, 4, 1],
@@ -82,7 +82,7 @@ export function useDashboard() {
       const [notice, setNotice] = useState<string | null>(null); // for global notice or alert message
     
       // Line Chart States
-      const [chartRange, setChartRange] = useState<ChartRange>("week");
+      const [chartRange, setChartRange] = useState<ChartRangeOption>("week");
       const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
       const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
       const [calendarRef, setCalendarRef] = useState(() => new Date());
@@ -114,7 +114,7 @@ export function useDashboard() {
         desc: "",
         deadline: "",
         category: "WORK",
-        priority: "MEDIUM",
+        priority: "MEDI",
         status: "TO DO",
         label: "PRIVATE"
       });
