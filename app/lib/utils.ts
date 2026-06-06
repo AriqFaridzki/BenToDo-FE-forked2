@@ -1,5 +1,7 @@
 // ─── Calendar Helpers ─────────────────────────────────────────────────────────
 
+import { getStoredUser } from "./api";
+
 export function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
@@ -18,6 +20,21 @@ export function getCalendarWeek(referenceDate: Date) {
   }
   return dates;
 }
+
+export const getDisplayName = () => {
+  const user = getStoredUser();
+  return user?.display_name || user?.email?.split("@")[0] || "User";
+};
+
+export const formatDate = (value: string | null) => {
+  if (!value) return "No due date";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+};
 
 export const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
