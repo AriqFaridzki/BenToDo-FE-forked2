@@ -904,7 +904,7 @@ export default function AdminDashboardPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                   <div>
                     <div style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, marginBottom: "4px" }}>User Activity</div>
-                    <div style={{ fontSize: "12px", color: COLOR.muted }}>Sing-ups over the last week</div>
+                    <div style={{ fontSize: "12px", color: COLOR.muted }}>Sign-ups over the last week</div>
                   </div>
 
                   {/* Chart Range Dropdown */}
