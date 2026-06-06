@@ -2,7 +2,7 @@
 
 import { getStoredUser } from "./api";
 
-export function isSameDay(a: Date, b: Date) {
+export function isSameDay(a: Date, b: Date) { // helper to compare if two dates are the same day (ignoring time)
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 

@@ -1,8 +1,8 @@
 // ─── ProductivityChartsView COMPONENT ────────────────────────────────────────────────────────
 import {COLOR, CARD_STYLE_COLOR} from "../../ui/color";
 import { CalendarSmIcon } from "../../ui/icons";
-import { ProductivityChart } from "../../features/dashboard/ProductivityCharts";
 import { ChartRangeOption} from "../../../dashboard/typesAndMaps";
+import { ProductivityChart } from "./ProductivityCharts";
 
 // 1. Define exactly what this component needs from the outside world
 interface ProductivityChartsViewProps {
