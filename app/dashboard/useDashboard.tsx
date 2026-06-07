@@ -7,7 +7,6 @@ import {
   clearAuthSession,
   getDashboardZen,
   getEnergySummary,
-  getStoredUser,
   getTasks,
   getTemplates,
   hasActiveSession,
@@ -21,11 +20,10 @@ import {
 import type { EnergyWeight, Task } from "../lib/api";
 
 // COLOR
-import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE_COLOR, buttonReset} from "../components/ui/color"; 
+import {GUEST_ENERGY_SUMMARY} from "../components/ui/color"; 
 
 import { 
     mapTaskToCard, 
-    mapEnergyToLevel, 
     mapTaskToViewTask, 
     mapTemplateToCard,
     ViewCard,
@@ -37,25 +35,25 @@ import {
 
 import { getDisplayName } from "../lib/utils";
 
-
-const CHART_DATA: Record<ChartRangeOption, { labels: string[]; data: number[] }> = {
-  week: {
-    labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    data: [3, 4, 2, 3, 3, 4, 1],
-  },
-  month: {
-    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-    data: [8, 12, 6, 10],
-  },
-  year: {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    data: [15, 20, 12, 18, 22, 14, 19, 25, 17, 21, 16, 23],
-  },
-};
+// use it for dummy chart data.
+// const CHART_DATA: Record<ChartRangeOption, { labels: string[]; data: number[] }> = {
+//   week: {
+//     labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+//     data: [3, 4, 2, 3, 3, 4, 1],
+//   },
+//   month: {
+//     labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+//     data: [8, 12, 6, 10],
+//   },
+//   year: {
+//     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+//     data: [15, 20, 12, 18, 22, 14, 19, 25, 17, 21, 16, 23],
+//   },
+// };
 
 // ─── Template Data (Dummy) ────────────────────────────────────────────────────────────
 
-const templatesData = [
+const templatesDummyData = [
   { id: 1, title: "Weekly Design Sprint", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "HIGH", subtasks: 2, type: ["All", "Public"] },
   { id: 2, title: "Proyek Kelompok", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "MEDIUM", subtasks: 4, type: ["All", "Private"] },
   { id: 3, title: "Rencana Belajar Semester", desc: "A collaborative 5-day process for answering critical business questions through design, prototyping, and testing.", level: "LOW", subtasks: 3, type: ["All", "Public"] },
@@ -113,7 +111,7 @@ export function useDashboard() {
       const [newTemplate, setNewTemplate] = useState(NewTemplateOption);
       const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
       const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
-      const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
+      const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesDummyData); // you need to call an API and structure it with types.
 
     // Load API Data for Dashboard
     const loadDashboardData = useCallback(async (silent = false) => { 

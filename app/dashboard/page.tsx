@@ -1,21 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useDashboard } from "./useDashboard"
-import { 
-  ChartRangeOption,
-  mapEnergyToLevel,
-  ViewCard, 
-  MONTH_NAMES,
-  DAY_HEADERS, } from "./typesAndMaps";
-
-
-import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
-
-
 
 import { COLOR} from "../components/ui/color"; //import color
-
 
 //Components
 
@@ -36,91 +24,19 @@ import { TemplateSuccessView } from "../components/features/templates/TemplateSu
 import { AddTaskModal } from "../components/features/tasks/AddTaskModal";
 
 export default function DashboardPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const dashboardStates = useDashboard();
 
   const {
- // STATES
-
-        apiTasks,
-        displayName,
-        energyData,
-        deadlineStats,
+      // STATES
         activeMenu,
-        templateFilter,
         templateView,
         notice,
-        chartRange,
-        timeRange,
-        chartDropdownOpen,
-        calendarRef,
         selectedTaskId,
-        taskDetailCopied,
-        templatesList,
         isAddTaskModalOpen,
-        addTaskTitle,
-        addTaskEnergy,
-        addTaskDeadline,
-        addTaskDesc,
-        addTaskSubtasks,
-        newSubtaskText,
-        localTaskMeta,
-        searchTask,
-        isActionLoading,
-        selectedTemplateId,
-        newTemplate,
-
-        setApiTasks,
-        setDisplayName,
-        setEnergyData,
-        setDeadlineStats,
-        setActiveMenu,
-
-        setNotice,
-
-        setChartRange,
-        setTimeRange,
-        setChartDropdownOpen,
-        setCalendarRef,
-
-        setSelectedTaskId,
-        setTaskDetailCopied,
-        setIsAddTaskModalOpen,
-        setAddTaskTitle,
-        setAddTaskEnergy,
-        setAddTaskDeadline,
-        setAddTaskDesc,
-        setAddTaskSubtasks,
-        setNewSubtaskText,
-
-        setLocalTaskMeta,
-        setSearchTask,
-        setIsActionLoading,
-
-        setSelectedTemplateId,
-        setNewTemplate,
-        setTemplateFilter,
-        setTemplateView,
-        setTemplatesList,
 
         // MEMOS
-        filteredTasks,
-        priorityTaskItems,
-        taskCards,
-        recentTaskItems,
-        emptyRecentTaskMessage,
-        cardItems,
         selectedCard,
-        completedCount,
-        upcomingDeadlineCount,
-        overdueCount,
-
-        // HANDLERS
-        handleSignOut,
-        handleToggleTaskStatus,
-        handleStartFocus,
-        handleUseCard,
-        handleCreateTask
 
   }= dashboardStates;
 

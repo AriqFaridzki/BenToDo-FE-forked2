@@ -1,4 +1,4 @@
-// ─── SIDEBAR COMPONENT ────────────────────────────────────────────────────────
+// ─── TopHeader COMPONENT ────────────────────────────────────────────────────────
 import {COLOR} from "../ui/color";
 import { BellIcon, SearchIcon } from "../ui/icons";
 import { MenuOption, TemplateViewOption } from "../../dashboard/typesAndMaps";
