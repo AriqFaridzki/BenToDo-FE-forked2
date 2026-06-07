@@ -12,59 +12,12 @@ import {
 
 import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 
-//color and SVG assets
-import { // import icons
-  DashboardIcon, 
-  TaskIcon, 
-  TemplateIcon, 
-  SignOutIcon, 
-  SearchIcon, 
-  BellIcon, 
-  PlayIcon, 
-  CheckSquareIcon, 
-  ClockAlertIcon, 
-  AlertTriangleIcon, 
-  BatteryIcon, 
-  CalendarSmIcon, 
-  SubtaskIcon, 
-  FilterIcon, 
-  ChevronLeftIcon, 
-  ChevronRightIcon, 
-  MoreDotsIcon, 
-  TrendUpIcon, 
-  TrendDownIcon, 
-  CompassIcon, 
-  EyeOutlineIcon, 
-  UsersIcon, 
-  ShareIcon, 
-  WrenchIcon, 
-  MailIcon, 
-  UsersUpIcon, 
-  DownloadSquareIcon, 
-  ArrowLeftIcon, 
-  CalendarLineIcon, 
-  SuccessCheckIcon, 
-  CheckCircleSolidIcon, 
-  PlusCircleIcon} from "../components/ui/icons";
 
-import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE_COLOR, buttonReset} from "../components/ui/color"; //import color
-import { LOGO_SRC } from "../lib/assets"; // logo
 
-//badges
-import { TrendBadge, PriorityBadge } from "../components/ui/badge";
-
-//helper or utils
-import { 
-  getCalendarWeek,
-  isSameDay,
-  formatDate,
-
-} from "../lib/utils";
+import { COLOR} from "../components/ui/color"; //import color
 
 
 //Components
-import { ProductivityChart } from "../components/features/dashboard/ProductivityCharts";
-
 
 import { Sidebar } from "../components/layout/Sidebar";
 import { TopHeader } from "../components/layout/topHeader";
@@ -169,7 +122,7 @@ export default function DashboardPage() {
         handleUseCard,
         handleCreateTask
 
-  }= useDashboard();
+  }= dashboardStates;
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: COLOR.surface, color: COLOR.text, fontFamily: "inherit" }}>
