@@ -31,6 +31,7 @@ import {
     ViewCard,
     ViewTask,
     ChartRangeOption,
+    NewTemplateOption,
 
     } from "./typesAndMaps";
 
@@ -109,15 +110,7 @@ export function useDashboard() {
     
       //template related states
       const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
-      const [newTemplate, setNewTemplate] = useState({
-        title: "",
-        desc: "",
-        deadline: "",
-        category: "WORK",
-        priority: "MEDI",
-        status: "TO DO",
-        label: "PRIVATE"
-      });
+      const [newTemplate, setNewTemplate] = useState(NewTemplateOption);
       const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
       const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
       const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
