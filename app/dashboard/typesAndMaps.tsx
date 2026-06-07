@@ -46,6 +46,18 @@ export type ViewCard = {
   previewItems?: TaskTemplate["preview_items"];
 };
 
+export const NewTemplateOption = {
+        title: "",
+        desc: "",
+        deadline: "",
+        category: "WORK",
+        priority: "MEDIUM",
+        status: "TO DO",
+        label: "PRIVATE"
+    }
+
+  
+
 export const mapEnergyToLevel = (energyWeight: EnergyWeight): PriorityLevel => {
   if (energyWeight === "Berat") return "HIGH";
   if (energyWeight === "Sedang") return "MEDIUM";

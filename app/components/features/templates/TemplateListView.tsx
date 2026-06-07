@@ -1,4 +1,4 @@
-// ─── SIDEBAR COMPONENT ────────────────────────────────────────────────────────
+// ─── TemplateListView COMPONENT ────────────────────────────────────────────────────────
 import {COLOR} from "../../ui/color";
 import { CompassIcon,SubtaskIcon,CalendarSmIcon,EyeOutlineIcon } from "../../ui/icons";
 import { MenuOption, TemplateViewOption, TemplateFilterOption } from "../../../dashboard/typesAndMaps";
