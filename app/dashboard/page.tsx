@@ -1,10 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { useDashboard } from "./useDashboard"
-import { ChartRange,mapEnergyToLevel,ViewCard } from "./typeMapDashboard";
+import { 
+  ChartRangeOption,
+  mapEnergyToLevel,
+  ViewCard, 
+  MONTH_NAMES,
+  DAY_HEADERS, } from "./typesAndMaps";
+
 
 import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
 
@@ -52,8 +56,6 @@ import { TrendBadge, PriorityBadge } from "../components/ui/badge";
 //helper or utils
 import { 
   getCalendarWeek,
-  MONTH_NAMES, 
-  DAY_HEADERS,
   isSameDay,
   formatDate,
 
@@ -61,10 +63,23 @@ import {
 
 
 //Components
-import { ProductivityChart } from "../components/features/ProductivityCharts";
+import { ProductivityChart } from "../components/features/dashboard/ProductivityCharts";
+
+
+import { Sidebar } from "../components/layout/Sidebar";
+import { TopHeader } from "../components/layout/topHeader";
+import { WelcomeBanner } from "../components/features/dashboard/WelcomeBanner";
+
+import { StatCards } from "../components/features/dashboard/StatCards";
+import { TemplateListView } from "../components/features/templates/TemplateListView";
+import { PriorityTask } from "../components/features/dashboard/PriorityTask";
+import { ProductivityChartsView } from "../components/features/dashboard/ProductivityChartsView";
+import { DynamicCalendar } from "../components/features/dashboard/DynamicCalendar";
+import { RecentTask } from "../components/features/dashboard/RecentTask";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const dashboardStates = useDashboard();
 
   const {
  // STATES
@@ -149,231 +164,27 @@ export default function DashboardPage() {
         handleUseCard,
         handleCreateTask
 
-  } = useDashboard();
+  }= useDashboard();
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: COLOR.surface, color: COLOR.text, fontFamily: "inherit" }}>
-
-
-
-      {/* ═══════════════════════════════════════
+    
+    {/* ═══════════════════════════════════
           SIDEBAR
-      ═══════════════════════════════════════ */}
-      <aside
-        style={{
-          width: "210px",
-          minHeight: "100vh",
-          backgroundColor: COLOR.surface,
-          borderRight: `1px solid ${COLOR.borderSoft}`,
-          display: "flex",
-          flexDirection: "column",
-          padding: "24px 0 0",
-          position: "sticky",
-          top: 0,
-          flexShrink: 0,
-        }}
-      >
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "0 28px", marginBottom: "38px" }}>
-          <span
-            aria-label="Ben To Do Logo"
-            style={{
-              width: "32px",
-              height: "32px",
-              display: "inline-block",
-              backgroundColor: COLOR.primary,
-              WebkitMask: `url('${LOGO_SRC}') center / contain no-repeat`,
-              mask: `url('${LOGO_SRC}') center / contain no-repeat`,
-              flexShrink: 0,
-            }}
-          />
-          <div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: COLOR.text, lineHeight: 1.1 }}>Ben To Do</div>
-            <div style={{ fontSize: "11px", color: COLOR.text, fontWeight: 400, lineHeight: 1.15 }}>Task Dashboard</div>
-          </div>
-        </div>
+      ═══════════════════════════════════════*/}
+      
+    <Sidebar dashboardStates={dashboardStates}/>
 
-        {/* Menu Label */}
-        <div style={{ fontSize: "11px", fontWeight: 600, color: COLOR.text, letterSpacing: "0", padding: "0 28px", marginBottom: "14px" }}>
-          MENU
-        </div>
-
-        {/* Nav Items */}
-        <nav style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "0 24px" }}>
-          {[
-            { key: "dashboard", label: "DashBoard", icon: <DashboardIcon /> },
-            { key: "task", label: "Task", icon: <TaskIcon /> },
-            { key: "template", label: "Template", icon: <TemplateIcon /> },
-          ].map(({ key, label, icon }) => (
-            <button
-              key={key}
-              onClick={() => {
-                setActiveMenu(key);
-                setSelectedTemplateId(null);
-                setTemplateView("list");
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "11px",
-                height: "42px",
-                padding: "0 14px",
-                borderRadius: "4px",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "13px",
-                fontWeight: activeMenu === key ? 600 : 400,
-                color: activeMenu === key ? COLOR.primary : COLOR.mutedDark,
-                backgroundColor: activeMenu === key ? COLOR.primarySoft : "transparent",
-                transition: "all 0.15s",
-                width: "100%",
-                textAlign: "left",
-              }}
-            >
-              <span style={{ display: "flex", color: activeMenu === key ? COLOR.primary : COLOR.mutedDark }}>
-                {icon}
-              </span>
-              {label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
-
-        {/* Sign Out */}
-        <div style={{ padding: "22px 24px", borderTop: `1px solid ${COLOR.borderSoft}` }}>
-          <button
-            onClick={handleSignOut}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "11px",
-              height: "36px",
-              padding: "0 12px",
-              borderRadius: "3px",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              fontSize: "13px",
-              fontWeight: 400,
-              color: COLOR.mutedDark,
-              backgroundColor: "transparent",
-              transition: "all 0.15s",
-              width: "100%",
-              textAlign: "left",
-            }}
-          >
-            <SignOutIcon />
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
+    
       {/* ═══════════════════════════════════════
           MAIN CONTENT
       ═══════════════════════════════════════ */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
 
-        {/* ── Top Bar ── */}
-        <header
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            height: "64px",
-            padding: "0 32px",
-            backgroundColor: COLOR.surface,
-            borderBottom: `1px solid ${COLOR.borderSoft}`,
-            position: "sticky",
-            top: 0,
-            zIndex: 20,
-          }}
-        >
-          <h1 style={{ fontSize: "18px", fontWeight: 400, color: COLOR.text, margin: 0 }}>
-            {activeMenu === "dashboard" ? "Dashboard" :
-              activeMenu === "task" ? (selectedTaskId ? "Detail Task" : "Task") :
-                templateView === "create" ? "Create Template" :
-                  templateView === "success" ? "Create Template" :
-                    templateView === "detail" ? "Detail Template" : "Template"}
-          </h1>
+        {/* ── Top Bar  (Top Header )── */}
+        <TopHeader dashboardStates={dashboardStates} />
 
-          {/* Search + Notification + Profile */}
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            {/* Search */}
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: COLOR.muted, display: "flex" }}>
-                <SearchIcon />
-              </span>
-              <input
-                type="text"
-                placeholder={activeMenu === "template" ? "Search template" : "Search task"}
-                value={searchTask}
-                onChange={(e) => setSearchTask(e.target.value)}
-                style={{
-                  width: "260px",
-                  height: "32px",
-                  borderRadius: "3px",
-                  border: `1px solid ${COLOR.border}`,
-                  paddingLeft: "36px",
-                  paddingRight: "12px",
-                  fontSize: "12px",
-                  color: COLOR.text,
-                  backgroundColor: COLOR.surface,
-                  outline: "none",
-                  fontFamily: "inherit",
-                }}
-              />
-            </div>
-
-            {/* Notification */}
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "32px",
-                height: "32px",
-                borderRadius: "3px",
-                border: `1px solid ${COLOR.border}`,
-                background: "none",
-                color: COLOR.mutedDark,
-                cursor: "pointer",
-              }}
-            >
-              <BellIcon />
-            </button>
-
-            {/* User Avatar + Name */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingLeft: "12px", borderLeft: `1px solid ${COLOR.borderSoft}` }}>
-              <div
-                style={{
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #6EE7F9 0%, #0F766E 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                }}
-              >
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <div style={{ fontSize: "12px", fontWeight: 700, color: COLOR.text, lineHeight: 1.15 }}>
-                  {displayName}
-                </div>
-                <div style={{ fontSize: "9px", color: COLOR.text, lineHeight: 1.2 }}>My Workspace</div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* ── Scrollable Content ── */}
+        {/* ── Scrollable Content ── (the Content ) */}
         <div style={{ flex: 1, padding: "26px 32px 38px", overflowY: "auto", overflowX: "hidden" }}>
           {notice && (
             <div
@@ -393,176 +204,27 @@ export default function DashboardPage() {
           )}
 
           {/* Welcome + Time Range + Focus Timer */}
-          {(activeMenu === "dashboard" || (activeMenu === "template" && templateView === "list") || (activeMenu === "task" && !selectedTaskId)) && (
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", width: "100%", marginBottom: "32px", gap: "24px" }}>
-              <div>
-                <h2 style={{ fontSize: "26px", fontWeight: 700, color: COLOR.text, margin: "0 0 6px", lineHeight: 1.15 }}>
-                  Welcome, {displayName}
-                </h2>
-                <p style={{ fontSize: "12px", color: COLOR.text, margin: 0, lineHeight: 1.4 }}>
-                  Here&apos;s what&apos;s happening with your workspace today.
-                </p>
-              </div>
+          {
+          (
+          dashboardStates.activeMenu === "dashboard"     ||
 
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-                {/* Toggle Buttons */}
-                <div
-                  style={{
-                    display: "flex",
-                    borderRadius: "3px",
-                    backgroundColor: "#F1F1F1",
-                    padding: "2px",
-                    overflow: "hidden",
-                  }}
-                >
-                  {activeMenu === "dashboard" ? (
-                    (["Daily", "Weekly", "Monthly", "Yearly"] as const).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setTimeRange(t)}
-                        style={{
-                          width: "64px",
-                          height: "32px",
-                          fontSize: "11px",
-                          fontWeight: timeRange === t ? 600 : 400,
-                          fontFamily: "inherit",
-                          color: COLOR.text,
-                          backgroundColor: timeRange === t ? COLOR.surface : "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {t}
-                      </button>
-                    ))
-                  ) : (
-                    (["All", "Public", "Private"] as const).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setTemplateFilter(t)}
-                        style={{
-                          width: "64px",
-                          height: "32px",
-                          fontSize: "11px",
-                          fontWeight: templateFilter === t ? 600 : 400,
-                          fontFamily: "inherit",
-                          color: COLOR.text,
-                          backgroundColor: templateFilter === t ? COLOR.surface : "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {t}
-                      </button>
-                    ))
-                  )}
-                </div>
+          (dashboardStates.activeMenu === "template" && dashboardStates.templateView === "list")       || 
 
-                {/* Start Focus Timer Button */}
-                <button
-                  onClick={() => {
-                    if (activeMenu === "dashboard") {
-                      void handleStartFocus(priorityTaskItems[0]?.id);
-                    } else if (activeMenu === "task") {
-                      setIsAddTaskModalOpen(true);
-                    } else if (activeMenu === "template") {
-                      setTemplateView("create");
-                    }
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    minWidth: activeMenu === "dashboard" ? "158px" : "160px",
-                    height: "34px",
-                    padding: "0 16px",
-                    borderRadius: "4px",
-                    backgroundColor: COLOR.primary,
-                    color: "#ffffff",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    transition: "background-color 0.15s",
-                  }}
-                >
-                  {activeMenu === "dashboard" ? <PlayIcon /> : <span style={{ fontSize: "16px", fontWeight: "bold", lineHeight: 1 }}>+</span>}
-                  {activeMenu === "dashboard" ? "Start Focus Timer" : activeMenu === "task" ? "Task Baru" : "Template Baru"}
-                </button>
-              </div>
-            </div>
+          (dashboardStates.activeMenu === "task" && !dashboardStates.selectedTaskId)
+        ) && 
+          
+          (
+            <WelcomeBanner dashboardStates={dashboardStates} />
+        
           )}
 
           {/* ── Dashboard View ── */}
           {activeMenu === "dashboard" && (
-            <>
-              {/* ── Stats Cards ── */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                  gap: "clamp(16px, 2vw, 32px)",
-                  marginBottom: "32px",
-                }}
-              >
-                {/* Task Completed */}
-                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Task Completed</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <CheckSquareIcon />
-                    <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{completedCount}</span>
-                    <TrendBadge value="+10%" up />
-                  </div>
-                  <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1 }}>from last week</div>
-                </div>
-
-                {/* Upcoming Deadlines */}
-                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Upcoming Deadlines</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <ClockAlertIcon />
-                    <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{upcomingDeadlineCount}</span>
-                    <TrendBadge value="+10%" up />
-                  </div>
-                  <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1 }}>from last week</div>
-                </div>
-
-                {/* Overdue Task */}
-                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Overdue Task</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <AlertTriangleIcon />
-                    <span style={{ fontSize: "34px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{overdueCount}</span>
-                    <TrendBadge value="-10%" up={false} />
-                  </div>
-                  <div style={{ fontSize: "12px", color: COLOR.muted, lineHeight: 1 }}>from last week</div>
-                </div>
-
-                {/* Energy */}
-                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "136px", padding: "20px clamp(18px, 2.8vw, 32px)", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                  <div style={{ fontSize: "14px", color: COLOR.text, fontWeight: 600, lineHeight: 1.1 }}>Energy</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <BatteryIcon />
-                    <span style={{ fontSize: "24px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>{energyData.percent}%</span>
-                    <span style={{ fontSize: "12px", color: COLOR.muted, fontWeight: 500, marginLeft: "auto" }}>{energyData.current} / {energyData.max} mins</span>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <div style={{ width: "100%", height: "8px", backgroundColor: "#E8E8E8", borderRadius: "999px", overflow: "hidden" }}>
-                      <div style={{ width: `${energyData.percent}%`, height: "100%", backgroundColor: energyData.isCritical ? COLOR.danger : COLOR.primary, borderRadius: "999px", transition: "width 0.3s ease, background-color 0.3s ease" }} />
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: energyData.isCritical ? COLOR.danger : COLOR.primary, fontWeight: 600 }}>
-                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: energyData.isCritical ? COLOR.danger : COLOR.primary }} />
-                      {energyData.current === 0 ? "Depleted" : energyData.isCritical ? "Critical Energy" : "Ready for do Task"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Priority Task + Productivity Chart Row ── */}
+            <> 
+              {/* StatCards */}
+              <StatCards dashboardStates={dashboardStates}/>
+        
+              {/* ── Priority Task + Productivity Chart + Dynamic Calendar Row ── */}
               <div
                 style={{
                   display: "grid",
@@ -575,526 +237,26 @@ export default function DashboardPage() {
                 }}
               >
                 {/* Priority Task Card */}
-                <div style={{ ...CARD_STYLE_COLOR, width: "100%", minHeight: "230px", padding: "24px clamp(18px, 2.2vw, 32px)", boxSizing: "border-box", gridColumn: "1" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
-                    <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Priority Task</span>
-                    <span onClick={() => setActiveMenu("task")} style={{ fontSize: "12px", color: COLOR.mutedDark, cursor: "pointer", lineHeight: 1 }}>View all</span>
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                    {priorityTaskItems.length === 0 ? (
-                      <div
-                        style={{
-                          backgroundColor: "#F1F1F1",
-                          borderRadius: "7px",
-                          padding: "18px clamp(16px, 1.8vw, 24px)",
-                          minHeight: "80px",
-                          display: "flex",
-                          alignItems: "center",
-                          color: COLOR.mutedDark,
-                          fontSize: "13px",
-                          fontWeight: 600,
-                        }}
-                      >
-                        Belum ada priority task
-                      </div>
-                    ) : priorityTaskItems.map((task) => (
-                      <div
-                        key={task.id ?? task.title}
-                        style={{
-                          backgroundColor: "#F1F1F1",
-                          borderRadius: "7px",
-                          padding: "18px clamp(16px, 1.8vw, 24px)",
-                          minHeight: "80px",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "15px", gap: "14px" }}>
-                          <span style={{ flex: 1, minWidth: 0, fontSize: "14px", fontWeight: 700, color: COLOR.text, lineHeight: 1.25, whiteSpace: "normal", wordBreak: "normal", overflowWrap: "break-word" }}>{task.title}</span>
-                          <PriorityBadge level={task.level} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
-                            <SubtaskIcon /> {task.subtask}
-                          </span>
-                          <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: COLOR.text, lineHeight: 1 }}>
-                            <CalendarSmIcon /> {task.date}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <PriorityTask dashboardStates={dashboardStates} />
 
                 {/* Productivity Overview Chart */}
-                <div style={{ ...CARD_STYLE_COLOR, padding: "24px clamp(18px, 2vw, 32px)", gridColumn: "2", gridRow: "1 / span 2", minHeight: "386px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
-                    <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Productivity Overview</span>
-                    <div style={{ position: "relative" }}>
-                      <button
-                        onClick={() => setChartDropdownOpen(!chartDropdownOpen)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "5px",
-                          height: "28px",
-                          padding: "0 12px",
-                          borderRadius: "4px",
-                          border: `1px solid ${COLOR.border}`,
-                          backgroundColor: COLOR.surface,
-                          fontSize: "11px",
-                          color: COLOR.text,
-                          cursor: "pointer",
-                          fontFamily: "inherit",
-                          transition: "border-color 0.2s, box-shadow 0.2s",
-                          borderColor: chartDropdownOpen ? COLOR.primary : COLOR.border,
-                          boxShadow: chartDropdownOpen ? `0 0 0 2px ${COLOR.primaryPale}` : "none",
-                        }}
-                      >
-                        <CalendarSmIcon />
-                        {chartRange === "week" ? "This Week" : chartRange === "month" ? "This Month" : "This Year"}
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-                          style={{ transition: "transform 0.2s", transform: chartDropdownOpen ? "rotate(180deg)" : "rotate(0)" }}>
-                          <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                      </button>
-                      {chartDropdownOpen && (
-                        <div style={{
-                          position: "absolute", top: "34px", right: 0, zIndex: 30,
-                          backgroundColor: COLOR.surface, border: `1px solid ${COLOR.border}`,
-                          borderRadius: "6px", boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-                          overflow: "hidden", minWidth: "130px",
-                          animation: "fadeSlideDown 0.18s ease",
-                        }}>
-                          {(["week", "month", "year"] as ChartRange[]).map((r) => (
-                            <button
-                              key={r}
-                              onClick={() => { setChartRange(r); setChartDropdownOpen(false); }}
-                              style={{
-                                display: "flex", alignItems: "center", gap: "8px",
-                                width: "100%", padding: "9px 14px", border: "none",
-                                backgroundColor: chartRange === r ? COLOR.primaryPale : "transparent",
-                                color: chartRange === r ? COLOR.primary : COLOR.text,
-                                fontSize: "12px", fontWeight: chartRange === r ? 600 : 400,
-                                cursor: "pointer", fontFamily: "inherit",
-                                transition: "background-color 0.15s",
-                              }}
-                              onMouseEnter={(e) => { if (chartRange !== r) e.currentTarget.style.backgroundColor = "#f9f9f9"; }}
-                              onMouseLeave={(e) => { if (chartRange !== r) e.currentTarget.style.backgroundColor = "transparent"; }}
-                            >
-                              {chartRange === r && <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: COLOR.primary }} />}
-                              {r === "week" ? "This Week" : r === "month" ? "This Month" : "This Year"}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ width: "100%", flex: 1, minHeight: "300px" }} key={chartRange}>
-                    <ProductivityChart range={chartRange} />
-                  </div>
-                </div>
+                <ProductivityChartsView dashboardStates={dashboardStates} />
 
                 {/* Dynamic Calendar */}
-                {(() => {
-                  const today = new Date();
-                  const weekDates = getCalendarWeek(calendarRef);
-                  const displayMonth = MONTH_NAMES[calendarRef.getMonth()];
-                  const displayYear = calendarRef.getFullYear();
-
-                  const deadlineDates = apiTasks
-                    .filter((t) => t.deadline && t.status !== "done")
-                    .map((t) => new Date(t.deadline!));
-
-                  return (
-                    <div style={{ ...CARD_STYLE_COLOR, width: "100%", padding: "12px 14px", minHeight: "86px", boxSizing: "border-box", gridColumn: "1" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "9px" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: COLOR.text }}>Calendar</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                          <button
-                            onClick={() => {
-                              const prev = new Date(calendarRef);
-                              prev.setDate(prev.getDate() - 7);
-                              setCalendarRef(prev);
-                            }}
-                            style={{ ...buttonReset, color: COLOR.text, display: "flex", padding: "2px", borderRadius: "4px", transition: "background-color 0.15s" }}
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = COLOR.panel; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-                          >
-                            <ChevronLeftIcon />
-                          </button>
-                          <button
-                            onClick={() => setCalendarRef(new Date())}
-                            style={{ ...buttonReset, fontSize: "11px", fontWeight: 600, color: COLOR.text, padding: "2px 4px", borderRadius: "4px", transition: "color 0.15s" }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = COLOR.primary; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = COLOR.text; }}
-                          >
-                            {displayMonth} {displayYear}
-                          </button>
-                          <button
-                            onClick={() => {
-                              const next = new Date(calendarRef);
-                              next.setDate(next.getDate() + 7);
-                              setCalendarRef(next);
-                            }}
-                            style={{ ...buttonReset, color: COLOR.text, display: "flex", padding: "2px", borderRadius: "4px", transition: "background-color 0.15s" }}
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = COLOR.panel; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-                          >
-                            <ChevronRightIcon />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", textAlign: "center", marginBottom: "5px" }}>
-                        {DAY_HEADERS.map((d) => (
-                          <span key={d} style={{ fontSize: "8px", fontWeight: 600, color: COLOR.muted }}>{d}</span>
-                        ))}
-                      </div>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", textAlign: "center", gap: "3px" }}>
-                        {weekDates.map((dateObj, i) => {
-                          const isToday = isSameDay(dateObj, today);
-                          const hasDot = deadlineDates.some((dl) => isSameDay(dl, dateObj));
-                          return (
-                            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
-                              <div
-                                onClick={() => {
-                                  const formatted = formatDate(dateObj.toISOString());
-                                  setSearchTask(searchTask === formatted ? "" : formatted);
-                                  document.getElementById("recent-tasks-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                                }}
-                                style={{
-                                  width: "19px",
-                                  height: "19px",
-                                  borderRadius: "50%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "10px",
-                                  fontWeight: isToday ? 700 : 500,
-                                  color: isToday ? COLOR.primary : COLOR.text,
-                                  backgroundColor: isToday ? COLOR.primarySoft : "transparent",
-                                  cursor: "pointer",
-                                  transition: "all 0.15s",
-                                }}
-                              >
-                                {dateObj.getDate()}
-                              </div>
-                              {hasDot && (
-                                <div style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: COLOR.primary }} />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
+                <DynamicCalendar dashboardStates={dashboardStates} />
               </div>
 
               {/* ── Recent Tasks Table ── */}
-              <div id="recent-tasks-section" style={{ ...CARD_STYLE_COLOR, width: "100%", padding: 0, marginBottom: "32px", overflow: "hidden" }}>
-                <div style={{ height: "78px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 30px" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, lineHeight: 1 }}>Recent Tasks</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    {/* Search in table */}
-                    <div style={{ position: "relative" }}>
-                      <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: COLOR.muted, display: "flex" }}>
-                        <SearchIcon />
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Search task"
-                        value={searchTask}
-                        onChange={(e) => setSearchTask(e.target.value)}
-                        style={{
-                          width: "255px",
-                          height: "28px",
-                          borderRadius: "7px",
-                          border: "none",
-                          paddingLeft: "40px",
-                          paddingRight: "14px",
-                          fontSize: "12px",
-                          color: COLOR.text,
-                          backgroundColor: "#F1F1F1",
-                          fontFamily: "inherit",
-                          outline: "none",
-                        }}
-                      />
-                    </div>
-                    {/* Filter */}
-                    <button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "7px",
-                        width: "78px",
-                        height: "32px",
-                        padding: 0,
-                        borderRadius: "7px",
-                        border: `1px solid ${COLOR.border}`,
-                        background: COLOR.surface,
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        color: COLOR.text,
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      <FilterIcon /> Filter
-                    </button>
-                  </div>
-                </div>
-
-                {/* Table */}
-                <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
-                  <colgroup>
-                    <col style={{ width: "33%" }} />
-                    <col style={{ width: "16%" }} />
-                    <col style={{ width: "17%" }} />
-                    <col style={{ width: "20%" }} />
-                    <col style={{ width: "14%" }} />
-                  </colgroup>
-                  <thead>
-                    <tr style={{ height: "52px", backgroundColor: COLOR.panel, borderTop: `1px solid ${COLOR.border}`, borderBottom: `1px solid ${COLOR.border}` }}>
-                      {["TASK ↕", "TASK LEVEL ↕", "SUBTASK ↕", "DUE DATE ↕", "VIEW DETAIL ↕"].map((h) => (
-                        <th
-                          key={h}
-                          style={{
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            color: COLOR.mutedDark,
-                            textAlign: "center",
-                            padding: "0 16px",
-                            letterSpacing: "0.02em",
-                            whiteSpace: "nowrap",
-                            verticalAlign: "middle",
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentTaskItems.length === 0 ? (
-                      <tr style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
-                        <td
-                          colSpan={5}
-                          style={{
-                            padding: "0 16px",
-                            textAlign: "center",
-                            verticalAlign: "middle",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: COLOR.mutedDark,
-                          }}
-                        >
-                          {emptyRecentTaskMessage}
-                        </td>
-                      </tr>
-                    ) : recentTaskItems.map((task) => (
-                      <tr key={task.id ?? task.title} style={{ height: "78px", borderBottom: `1px solid ${COLOR.borderSoft}` }}>
-                        <td style={{ padding: "0 16px 0 clamp(58px, 4.5vw, 80px)", verticalAlign: "middle" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "46px", minWidth: 0 }}>
-                            <input
-                              type="checkbox"
-                              checked={!!task.done}
-                              disabled={isActionLoading}
-                              onChange={(e) => {
-                                void handleToggleTaskStatus(task, e.target.checked);
-                              }}
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                                accentColor: COLOR.primary,
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span style={{ fontSize: "13px", fontWeight: 700, color: COLOR.text, lineHeight: 1.2, overflowWrap: "break-word" }}>{task.title}</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: "0 16px", verticalAlign: "middle", textAlign: "center" }}>
-                          <PriorityBadge level={task.level} />
-                        </td>
-                        <td style={{ padding: "0 16px", fontSize: "13px", color: COLOR.text, verticalAlign: "middle", textAlign: "center" }}>
-                          {task.subtask}
-                        </td>
-                        <td style={{ padding: "0 16px", fontSize: "13px", color: COLOR.text, fontWeight: 700, verticalAlign: "middle", textAlign: "center" }}>
-                          {task.date}
-                        </td>
-                        <td style={{ padding: "0 16px", verticalAlign: "middle" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "34px" }}>
-                            <button style={{ ...buttonReset, color: COLOR.text, display: "flex" }}>
-                              <MoreDotsIcon />
-                            </button>
-                            <button
-                              disabled={isActionLoading}
-                              onClick={() => {
-                                void handleStartFocus(task.id);
-                              }}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                padding: "6px 16px",
-                                minWidth: "110px",
-                                borderRadius: "8px",
-                                border: "1px solid #d1d5db",
-                                backgroundColor: "#ffffff",
-                                fontSize: "12px",
-                                fontWeight: 600,
-                                color: "#111827",
-                                cursor: "pointer",
-                                fontFamily: "inherit",
-                                whiteSpace: "nowrap",
-                                transition: "all 0.15s"
-                              }}
-                              onMouseEnter={(e) => {
-                                if (!isActionLoading) {
-                                  e.currentTarget.style.backgroundColor = "#f9fafb";
-                                }
-                              }}
-                              onMouseLeave={(e) => {
-                                if (!isActionLoading) {
-                                  e.currentTarget.style.backgroundColor = "#ffffff";
-                                }
-                              }}
-                            >
-                              Mulai Fokus
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <RecentTask dashboardStates={dashboardStates} />
             </>
           )}
 
           {/* ── Template / Task View ── */}
-          {(activeMenu === "template" || (activeMenu === "task" && !selectedTaskId)) && templateView === "list" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "clamp(28px, 3vw, 44px)", alignItems: "start" }}>
-                {cardItems
-                  .filter((item) => item.type.includes(templateFilter))
-                  .map((item) => (
-                    <div key={item.id} style={{
-                      width: "100%",
-                      minHeight: "258px",
-                      backgroundColor: COLOR.surface,
-                      borderRadius: "7px",
-                      border: `1px solid ${COLOR.border}`,
-                      padding: "24px",
-                      boxSizing: "border-box",
-                      display: "flex",
-                      flexDirection: "column"
-                    }}>
-                      {/* Icon & Badge */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
-                        <div style={{
-                          width: "44px", height: "44px", borderRadius: "7px", backgroundColor: "#E5DEFF",
-                          display: "flex", alignItems: "center", justifyContent: "center"
-                        }}>
-                          <CompassIcon />
-                        </div>
-                        <span style={{
-                          display: "inline-block", fontSize: "11px", fontWeight: 700,
-                          color: COLOR.mutedDark, backgroundColor: "#F1F1F1", borderRadius: "999px", padding: "4px 13px",
-                        }}>
-                          {item.level}
-                        </span>
-                      </div>
+          {(activeMenu === "template" || 
+          (activeMenu === "task" && !selectedTaskId)) && 
+          templateView === "list" && (
 
-                      {/* Title & Desc */}
-                      <h3 style={{ fontSize: "16px", fontWeight: 700, color: COLOR.text, marginBottom: "10px", marginTop: 0, lineHeight: 1.25 }}>
-                        {item.title}
-                      </h3>
-                      <p style={{ fontSize: "14px", color: "#4B4B4B", lineHeight: 1.45, marginBottom: "22px" }}>
-                        {item.desc}
-                      </p>
-
-                      {/* Tags */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
-                        <span style={{
-                          display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: COLOR.text,
-                          backgroundColor: "#F1F1F1", padding: "6px 10px", borderRadius: "5px", fontWeight: 500
-                        }}>
-                          <SubtaskIcon /> {item.subtasks} Subtasks
-                        </span>
-                        <span style={{
-                          display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: COLOR.text,
-                          backgroundColor: "#F1F1F1", padding: "6px 10px", borderRadius: "5px", fontWeight: 500
-                        }}>
-                          <CalendarSmIcon /> No due date
-                        </span>
-                      </div>
-
-                      {/* Buttons */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "auto" }}>
-                        <button
-                          onClick={() => {
-                            void handleUseCard(item);
-                          }}
-                          style={{
-                            flex: 1, height: "40px", borderRadius: "7px", backgroundColor: COLOR.primary, color: "#ffffff",
-                            fontSize: "13px", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "inherit",
-                            transition: "background-color 0.15s"
-                          }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLOR.primaryHover; }}
-                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLOR.primary; }}
-                        >
-                          {activeMenu === "task" ? "Mulai Fokus" : "Use Template"}
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (activeMenu === "template") {
-                              setSelectedTemplateId(item.id);
-                              setTemplateView("detail");
-                            } else if (activeMenu === "task" && item.taskId) {
-                              setSelectedTaskId(item.taskId);
-                            }
-                          }}
-                          style={{
-                            width: "40px", height: "40px", borderRadius: "7px", border: `1px solid ${COLOR.border}`, backgroundColor: COLOR.surface,
-                            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "border-color 0.15s"
-                          }}>
-                          <EyeOutlineIcon />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-
-              {/* Pagination */}
-              <div style={{ display: "none", justifyContent: "center", gap: "8px", marginTop: "16px" }}>
-                {[1, 2, 3].map((page) => (
-                  <button key={page} style={{
-                    width: "28px", height: "28px", borderRadius: "4px",
-                    border: page === 1 ? "1px solid #86efac" : "1px solid #e5e7eb",
-                    backgroundColor: "#ffffff",
-                    color: page === 1 ? "#16a34a" : "#6b7280",
-                    fontSize: "12px", fontWeight: 500, cursor: "pointer", fontFamily: "inherit"
-                  }}>
-                    {page}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tips Banner */}
-              <div style={{
-                display: "none",
-                backgroundColor: "#dcfce7", color: "#166534", padding: "16px 24px",
-                borderRadius: "8px", fontSize: "13px", fontWeight: 600,
-                textAlign: "center", marginTop: "16px"
-              }}>
-                Tips : Use templates to speed up your task planning. You can still edit them after use.
-              </div>
-            </div>
+            <TemplateListView dashboardStates={dashboardStates}/> 
           )}
 
           {/* ── Detail Task View ── */}

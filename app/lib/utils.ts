@@ -2,7 +2,7 @@
 
 import { getStoredUser } from "./api";
 
-export function isSameDay(a: Date, b: Date) {
+export function isSameDay(a: Date, b: Date) { // helper to compare if two dates are the same day (ignoring time)
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
@@ -34,7 +34,4 @@ export const formatDate = (value: string | null) => {
     month: "short",
     year: "numeric",
   }).format(new Date(value));
-};
-
-export const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+}

@@ -30,14 +30,14 @@ import {
     mapTemplateToCard,
     ViewCard,
     ViewTask,
-    ChartRange,
+    ChartRangeOption,
 
-    } from "./typeMapDashboard";
+    } from "./typesAndMaps";
 
 import { getDisplayName } from "../lib/utils";
 
 
-const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
+const CHART_DATA: Record<ChartRangeOption, { labels: string[]; data: number[] }> = {
   week: {
     labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     data: [3, 4, 2, 3, 3, 4, 1],
@@ -79,12 +79,10 @@ export function useDashboard() {
     
       // UI States or Nav states
       const [activeMenu, setActiveMenu] = useState("dashboard"); // set which active menu: dashboard, task, template
-      const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
-      const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
       const [notice, setNotice] = useState<string | null>(null); // for global notice or alert message
     
       // Line Chart States
-      const [chartRange, setChartRange] = useState<ChartRange>("week");
+      const [chartRange, setChartRange] = useState<ChartRangeOption>("week");
       const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
       const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
       const [calendarRef, setCalendarRef] = useState(() => new Date());
@@ -93,7 +91,6 @@ export function useDashboard() {
       //Task Related States
       const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
       const [taskDetailCopied, setTaskDetailCopied] = useState(false); // to show "copied" state when user copy task detail in task detail view
-      const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
       const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
       
       // Create Task Form States
@@ -117,10 +114,13 @@ export function useDashboard() {
         desc: "",
         deadline: "",
         category: "WORK",
-        priority: "MIDLE",
+        priority: "MEDI",
         status: "TO DO",
         label: "PRIVATE"
       });
+      const [templateFilter, setTemplateFilter] = useState<"All" | "Public" | "Private">("All");
+      const [templateView, setTemplateView] = useState<"list" | "detail" | "create" | "success">("list");
+      const [templatesList, setTemplatesList] = useState<ViewCard[]>(templatesData);
 
     // Load API Data for Dashboard
     const loadDashboardData = useCallback(async (silent = false) => { 

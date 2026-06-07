@@ -1,15 +1,14 @@
 // ─── Mini Line Chart (SVG) ────────────────────────────────────────────────────
 // Data Labels: Week (Sun-Sat), Month (Week 1-4), Year (Jan-Dec)
 
-import { useState } from "react";
-import { getCalendarWeek, DAY_HEADERS } from "../../lib/utils";
-import { COLOR } from "../ui/color";
+import { getCalendarWeek } from "../../../lib/utils";
+import { COLOR } from "../../ui/color";
+import { DAY_HEADERS } from "../../../dashboard/typesAndMaps";
+import { ChartRangeOption } from "../../../dashboard/typesAndMaps";
 
 
 
-type ChartRange = "week" | "month" | "year"; // custom type for chart range
-
-const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
+const CHART_DATA: Record<ChartRangeOption, { labels: string[]; data: number[] }> = {
   week: {
     labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     data: [3, 4, 2, 3, 3, 4, 1],
@@ -24,7 +23,7 @@ const CHART_DATA: Record<ChartRange, { labels: string[]; data: number[] }> = {
   },
 };
 
-export function ProductivityChart({ range = "week" }: { range?: ChartRange }) {
+export function ProductivityChart({ range = "week" }: { range?: ChartRangeOption }) {
   const { labels, data } = CHART_DATA[range];
   const width = 520;
   const height = 220;
@@ -33,7 +32,6 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRange }) {
   const maxVal = Math.max(...data) + 2;
   const chartW = width - padX * 2;
   const chartH = height - padY * 2;
-
 
 
   const totalValue = data.reduce((sum, v) => sum + v, 0);
