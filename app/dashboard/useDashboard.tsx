@@ -18,7 +18,7 @@ import {
 } from "../lib/api";
 
 // CUSTOM DATA TYPES
-import type { EnergyWeight, Task, TaskStatus, TaskTemplate } from "../lib/api";
+import type { EnergyWeight, Task } from "../lib/api";
 
 // COLOR
 import { COLOR, GUEST_ENERGY_SUMMARY, CARD_STYLE_COLOR, buttonReset} from "../components/ui/color"; 
@@ -298,13 +298,16 @@ export function useDashboard() {
           return;
         }
         setIsActionLoading(true);
+
         try {
           const result = await createTask({
             title: addTaskTitle,
             energy_weight: addTaskEnergy,
             deadline: addTaskDeadline || null,
           });
+
           // Store description and subtasks locally
+
           if (result?.data?.id) {
             setLocalTaskMeta(prev => ({
               ...prev,
@@ -314,6 +317,7 @@ export function useDashboard() {
               },
             }));
           }
+          
           setNotice("Tugas berhasil ditambahkan.");
           setIsAddTaskModalOpen(false);
           setAddTaskTitle("");
