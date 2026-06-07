@@ -51,10 +51,12 @@ export const NewTemplateOption = {
         desc: "",
         deadline: "",
         category: "WORK",
-        priority: "MEDI",
+        priority: "MEDIUM",
         status: "TO DO",
         label: "PRIVATE"
     }
+
+  
 
 export const mapEnergyToLevel = (energyWeight: EnergyWeight): PriorityLevel => {
   if (energyWeight === "Berat") return "HIGH";

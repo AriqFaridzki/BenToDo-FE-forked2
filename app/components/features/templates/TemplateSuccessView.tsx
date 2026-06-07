@@ -14,7 +14,7 @@ import { ViewCard, NewTemplateOption } from "../../../dashboard/typesAndMaps";
 
 // 1. Define exactly what this component needs from the outside world
 
-interface AddTaskModalProps { 
+interface TemplateSuccessViewProps { 
     //Setters
     setTemplateView: (view: TemplateViewOption) => void;
     setTemplateFilter: (filter: TemplateFilterOption) => void;
@@ -26,7 +26,7 @@ interface AddTaskModalProps {
 }
 
 // 2. Accept those needs as parameters (props)
-export function AddTaskModal({dashboardStates}: {dashboardStates: any}) {
+export function TemplateSuccessView({dashboardStates}: {dashboardStates: any}) {
 
 const {
     
