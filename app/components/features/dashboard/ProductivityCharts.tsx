@@ -111,12 +111,12 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRangeOption
         padding: "0 4px" 
       }}>
         <span style={{ fontSize: "11px", color: COLOR.muted, fontWeight: 500 }}>
-          Tugas Selesai Dikejakan:
+          Task Completed:
         </span>
         <div style={{ fontSize: "12px", color: COLOR.text, fontWeight: 500 }}>
-          <span>Total: <strong style={{ color: COLOR.primary }}>{totalValue} Jam</strong></span>
+          <span>Total: <strong style={{ color: COLOR.primary }}>{totalValue} Hour</strong></span>
           <span style={{ margin: "0 8px", color: "#E8E8E8" }}>|</span>
-          <span>Rata-rata: <strong style={{ color: COLOR.primary }}>{avgValue} Jam/hari</strong></span>
+          <span>Average: <strong style={{ color: COLOR.primary }}>{avgValue} Hour/Day</strong></span>
         </div>
       </div>
 
@@ -307,7 +307,7 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRangeOption
                   color: "#4C4546",
                   letterSpacing: "0.12px"
                 }}>
-                  Selesai
+                  Completed
                 </span>
               </div>
               <span style={{
@@ -338,7 +338,7 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRangeOption
                   color: "#4C4546",
                   letterSpacing: "0.12px"
                 }}>
-                  Belum selesai
+                  Not Completed
                 </span>
               </div>
               <span style={{
