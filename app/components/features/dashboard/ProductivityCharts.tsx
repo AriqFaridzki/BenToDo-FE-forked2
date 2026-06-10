@@ -254,7 +254,7 @@ export function ProductivityChart({ range = "week" }: { range?: ChartRangeOption
               left: `${ChartToolTip.x + 13}%`,
               // Kita geser Y ke atas sedikit agar tooltip berada tepat di atas titik
               // Perkiraan konversi tinggi viewBox (250) ke tinggi div (100%)
-              top: `${(ChartToolTip.y / (height - 50)) * 100}%`, 
+              top: `${(ChartToolTip.y / (height + 30)) * 100}%`, 
               transform: "translate(-50%, calc(-100% - 12px))", // Menengahkah tooltip berdasarkan sumbu X
               zIndex: 10,
               pointerEvents: "none", // Agar tooltip tidak memblokir event hover
