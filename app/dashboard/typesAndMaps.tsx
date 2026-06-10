@@ -6,6 +6,7 @@ import { formatDate } from "../lib/utils";
 
 export const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+export const DAY_HEADERS_COMPLETE = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 export type ChartRangeOption = "week" | "month" | "year"; // custom type for chart range
 
 
@@ -32,6 +33,16 @@ export type ViewTask = {
   done?: boolean;
   status?: TaskStatus;
 };
+
+export type tooltipChartState = {
+  visible: boolean;
+    x: number;
+    y: number;
+    label: string;
+    completed: number;
+    incomplete: number;
+}
+
 
 
 export type ViewCard = {

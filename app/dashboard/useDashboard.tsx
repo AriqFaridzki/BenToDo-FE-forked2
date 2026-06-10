@@ -30,6 +30,7 @@ import {
     ViewTask,
     ChartRangeOption,
     NewTemplateOption,
+    tooltipChartState,
 
     } from "./typesAndMaps";
 
@@ -85,6 +86,8 @@ export function useDashboard() {
       const [timeRange, setTimeRange] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">("Weekly");
       const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
       const [calendarRef, setCalendarRef] = useState(() => new Date());
+      
+      
      
       
       //Task Related States

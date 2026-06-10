@@ -9,6 +9,19 @@ export const DashboardIcon = () => (
   </svg>
 );
 
+export const dashedVerticalGreenLine = () => (
+  <svg width="1" height="102" viewBox="0 0 1 102" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0.5 0L0.500004 102" stroke="url(#paint0_linear_1110_1660)" stroke-dasharray="2 2"/>
+    <defs>
+    <linearGradient id="paint0_linear_1110_1660" x1="0" y1="2.18557e-08" x2="4.45856e-06" y2="102" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#009E08" stop-opacity="0.3"/>
+    <stop offset="0.480769" stop-color="#009E08"/>
+    <stop offset="1" stop-color="#009E08" stop-opacity="0.3"/>
+    </linearGradient>
+    </defs>
+</svg>
+);
+
 export const TaskIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
